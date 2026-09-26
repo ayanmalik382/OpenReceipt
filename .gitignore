@@ -1,0 +1,10 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+build/
+/captures
+.externalNativeBuild
+server/node_modules/
+server/data/
+server/.env

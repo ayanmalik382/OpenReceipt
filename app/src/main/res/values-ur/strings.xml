@@ -1,0 +1,403 @@
+<resources>
+    <string name="app_name">رسید بک</string>
+
+    <!-- Common -->
+    <string name="back">واپس</string>
+    <string name="cancel">منسوخ کریں</string>
+    <string name="save">محفوظ کریں</string>
+    <string name="delete">حذف کریں</string>
+    <string name="close">بند کریں</string>
+    <string name="edit">ترمیم کریں</string>
+    <string name="add">شامل کریں</string>
+    <string name="done">مکمل</string>
+    <string name="none">کوئی نہیں</string>
+    <string name="search">تلاش کریں</string>
+    <string name="all">تمام</string>
+    <string name="optional">اختیاری</string>
+    <string name="today">آج</string>
+    <string name="settled">حساب برابر</string>
+
+    <!-- Auth -->
+    <string name="auth_tagline">آپ کی رسیدیں اور گاہکوں کا ریکارڈ آپ کے فون میں محفوظ رہتا ہے اور انٹرنیٹ آنے پر بیک اپ ہو جاتا ہے۔</string>
+    <string name="sign_in">لاگ ان کریں</string>
+    <string name="email">ای میل</string>
+    <string name="password">پاس ورڈ</string>
+    <string name="forgot_password">پاس ورڈ بھول گئے؟</string>
+    <string name="create_new_account">نیا اکاؤنٹ بنائیں</string>
+    <string name="create_account">اکاؤنٹ بنائیں</string>
+    <string name="register_tagline">ہم آپ کی ای میل کی تصدیق کے لیے 6 ہندسوں کا کوڈ بھیجیں گے۔</string>
+    <string name="password_hint">پاس ورڈ (کم از کم 8 حروف)</string>
+    <string name="confirm_password">پاس ورڈ دوبارہ لکھیں</string>
+    <string name="send_code">کوڈ بھیجیں</string>
+    <string name="already_have_account">میرا اکاؤنٹ پہلے سے موجود ہے</string>
+    <string name="enter_code">کوڈ درج کریں</string>
+    <string name="code_sent_to">ہم نے %1$s پر 6 ہندسوں کا کوڈ بھیجا ہے۔ یہ 10 منٹ تک درست رہے گا۔</string>
+    <string name="code_hint">6 ہندسوں کا کوڈ</string>
+    <string name="verify">تصدیق کریں</string>
+    <string name="send_code_again">کوڈ دوبارہ بھیجیں</string>
+    <string name="code_resent">اگر اکاؤنٹ موجود ہے تو نیا کوڈ بھیج دیا گیا ہے۔</string>
+    <string name="reset_password">پاس ورڈ تبدیل کریں</string>
+    <string name="reset_tagline_send">ہم آپ کو ایک کوڈ ای میل کریں گے۔</string>
+    <string name="reset_tagline_enter">اپنی ای میل سے کوڈ درج کریں اور نیا پاس ورڈ منتخب کریں۔</string>
+    <string name="change_password">پاس ورڈ تبدیل کریں</string>
+    <string name="back_to_sign_in">لاگ ان پر واپس جائیں</string>
+    <string name="err_enter_valid_email">درست ای میل درج کریں</string>
+    <string name="err_password_min">پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے</string>
+    <string name="err_passwords_no_match">پاس ورڈ مماثل نہیں ہیں</string>
+    <string name="err_enter_email_password">اپنی ای میل اور پاس ورڈ درج کریں</string>
+    <string name="err_offline_auth">انٹرنیٹ کنکشن نہیں ہے۔ انٹرنیٹ صرف سائن ان اور رجسٹریشن کے لیے درکار ہے۔</string>
+
+    <!-- Server error codes -->
+    <string name="srv_invalid_email">درست ای میل درج کریں</string>
+    <string name="srv_password_len">پاس ورڈ 8 سے 72 حروف کا ہونا چاہیے</string>
+    <string name="srv_email_exists">یہ ای میل پہلے سے رجسٹرڈ ہے۔ براہ کرم لاگ ان کریں۔</string>
+    <string name="srv_invalid_code">کوڈ غلط ہے یا میعاد ختم ہو چکی ہے</string>
+    <string name="srv_invalid_credentials">ای میل یا پاس ورڈ غلط ہے</string>
+    <string name="srv_unverified">پہلے اپنی ای میل کی تصدیق کریں</string>
+    <string name="srv_wrong_password">پاس ورڈ غلط ہے</string>
+    <string name="srv_session_expired">سیشن ختم ہو گیا۔ دوبارہ لاگ ان کریں۔</string>
+    <string name="srv_rate_limited">بہت زیادہ کوششیں ہو گئیں۔ ایک منٹ انتظار کریں۔</string>
+    <string name="srv_server_error">سرور میں مسئلہ ہوا۔ دوبارہ کوشش کریں۔</string>
+    <string name="srv_invalid_request">کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔</string>
+
+    <!-- Businesses -->
+    <string name="my_businesses">میرے کاروبار</string>
+    <string name="add_business">کاروبار شامل کریں</string>
+    <string name="new_business">نیا کاروبار</string>
+    <string name="business_settings">کاروبار کی ترتیبات</string>
+    <string name="no_business_yet">ابھی کوئی کاروبار نہیں ہے۔\n”کاروبار شامل کریں“ پر دبائیں اور پہلا کاروبار بنائیں۔</string>
+    <string name="sync_now">ابھی سنک کریں</string>
+    <string name="sign_out">سائن آؤٹ</string>
+    <string name="delete_account">اکاؤنٹ حذف کریں</string>
+    <string name="sign_out_confirm_title">سائن آؤٹ کریں؟</string>
+    <string name="sign_out_confirm_body">آپ کا ڈیٹا اس فون میں محفوظ رہے گا اور دوبارہ سائن ان کرنے پر یہاں موجود ہوگا۔</string>
+    <string name="delete_account_body">اس سے آپ کا اکاؤنٹ، تمام کاروبار، رسیدیں اور گاہک سرور اور اس فون سے مستقل طور پر حذف ہو جائیں گے۔ یہ عمل واپس نہیں ہو سکتا۔</string>
+    <string name="enter_your_password">اپنا پاس ورڈ درج کریں</string>
+    <string name="delete_everything">سب کچھ حذف کریں</string>
+    <string name="err_delete_account_failed">حذف نہیں ہو سکا۔ اپنا انٹرنیٹ کنکشن چیک کریں۔</string>
+    <string name="syncing">سنک ہو رہا ہے…</string>
+    <string name="backed_up_at">بیک اپ ہوا %1$s</string>
+    <string name="not_synced_yet">ابھی تک سنک نہیں ہوا</string>
+    <string name="sync_offline">آف لائن ہیں – انٹرنیٹ آنے پر سنک ہو جائے گا</string>
+    <string name="sync_failed">سنک ناکام ہوا</string>
+
+    <string name="business_name_req">کاروبار کا نام *</string>
+    <string name="address">پتہ</string>
+    <string name="business_phone">کاروبار کا فون نمبر</string>
+    <string name="sales_terms_offered">فروخت کی شرائط جو آپ دیتے ہیں</string>
+    <string name="term_cash">نقد</string>
+    <string name="term_credit">ادھار (گاہک بعد میں ادائیگی کرے گا)</string>
+    <string name="currency">کرنسی</string>
+    <string name="receipt_prefix">رسید کا ابتدائی حرف</string>
+    <string name="receipt_footer">رسید پر پیغام</string>
+    <string name="receipt_language">رسید کی زبان</string>
+    <string name="same_as_app">ایپ کی زبان جیسی</string>
+    <string name="supplier_names_hint">سپلائرز کے نام (ایک لائن میں ایک نام، اختیاری)</string>
+    <string name="create_business">کاروبار بنائیں</string>
+    <string name="save_changes">تبدیلیاں محفوظ کریں</string>
+    <string name="delete_this_business">یہ کاروبار حذف کریں</string>
+    <string name="delete_business_title">کاروبار حذف کریں؟</string>
+    <string name="delete_business_body">”%1$s“ آپ کے اکاؤنٹ سے ہٹا دیا جائے گا۔ اس کا ریکارڈ حفاظت کے لیے سرور پر رہے گا مگر آپ کو نظر نہیں آئے گا۔</string>
+    <string name="err_enter_business_name">کاروبار کا نام درج کریں</string>
+    <string name="err_valid_phone">درست فون نمبر درج کریں</string>
+    <string name="err_choose_sales_term">کم از کم ایک فروخت کی شرط منتخب کریں</string>
+    <string name="footer_default">آپ کے کاروبار کا شکریہ!</string>
+
+    <!-- Language -->
+    <string name="language">زبان</string>
+    <string name="choose_language">زبان منتخب کریں</string>
+    <string name="restart_hint">ایپ فوری طور پر تبدیل ہو جائے گی۔</string>
+
+    <!-- Home -->
+    <string name="new_receipt_order">نئی رسید / آرڈر</string>
+    <string name="todays_sales">آج کی فروخت</string>
+    <string name="receipts_count">%1$d رسیدیں</string>
+    <string name="cash_in_today">آج آنے والی نقدی</string>
+    <string name="out_amount">خرچ: %1$s</string>
+    <string name="customers_owe_you">گاہکوں پر واجب الادا</string>
+    <string name="customers_count">%1$d گاہک</string>
+    <string name="low_stock">اسٹاک کم ہے</string>
+    <string name="products_to_refill">اشیاء دوبارہ منگوائیں</string>
+    <string name="tile_receipts">رسیدیں</string>
+    <string name="tile_customers">گاہک</string>
+    <string name="tile_products">اشیاء اور اسٹاک</string>
+    <string name="tile_suppliers">سپلائرز</string>
+    <string name="tile_cash">ادائیگیاں اور اخراجات</string>
+    <string name="tile_reports">رپورٹس اور ایکسپورٹ</string>
+
+    <!-- Products -->
+    <string name="products_and_stock">اشیاء اور اسٹاک</string>
+    <string name="search_products">اشیاء تلاش کریں</string>
+    <string name="no_products_yet">ابھی کوئی چیز شامل نہیں ہے۔\n+ پر دبائیں اور قیمت کے ساتھ اشیاء شامل کریں۔</string>
+    <string name="stock_line">اسٹاک: %1$s %2$s</string>
+    <string name="low_stock_suffix">  •  اسٹاک کم ہے</string>
+    <string name="per_unit">فی %1$s</string>
+    <string name="add_product">چیز شامل کریں</string>
+    <string name="edit_product">چیز میں ترمیم کریں</string>
+    <string name="product_name_req">چیز کا نام *</string>
+    <string name="selling_price_req">فروخت کی قیمت *</string>
+    <string name="unit">اکائی</string>
+    <string name="cost_price_optional">خرید قیمت (اختیاری)</string>
+    <string name="supplier">سپلائر</string>
+    <string name="track_stock">اسٹاک کی مقدار رکھیں</string>
+    <string name="current_stock">موجودہ اسٹاک</string>
+    <string name="low_stock_warn_at">اس مقدار پر یا کم ہونے پر مطلع کریں</string>
+    <string name="err_enter_product_name">چیز کا نام درج کریں</string>
+    <string name="err_valid_price">درست قیمت درج کریں</string>
+    <string name="delete_product_title">چیز حذف کریں؟</string>
+    <string name="delete_product_body">”%1$s“ ہٹا دی جائے گی۔ پرانی رسیدوں کا ریکارڈ باقی رہے گا۔</string>
+    <string name="export_stock_list">اسٹاک لسٹ ایکسپورٹ کریں</string>
+    <string name="only_x_in_stock">صرف %1$s %2$s اسٹاک میں ہے</string>
+
+    <string name="unit_pcs">عدد</string>
+    <string name="unit_kg">کلو</string>
+    <string name="unit_dozen">درجن</string>
+    <string name="unit_meter">میٹر</string>
+    <string name="unit_liter">لیٹر</string>
+    <string name="unit_box">ڈبہ</string>
+    <string name="unit_bag">بوری</string>
+
+    <!-- Suppliers -->
+    <string name="suppliers">سپلائرز</string>
+    <string name="no_suppliers_yet">ابھی کوئی سپلائر شامل نہیں ہے۔</string>
+    <string name="add_supplier">سپلائر شامل کریں</string>
+    <string name="edit_supplier">سپلائر میں ترمیم کریں</string>
+    <string name="supplier_name_req">سپلائر کا نام *</string>
+    <string name="phone">فون نمبر</string>
+    <string name="delete_supplier_title">سپلائر حذف کریں؟</string>
+    <string name="delete_supplier_body">”%1$s“ ہٹا دیا جائے گا۔</string>
+
+    <!-- Customers -->
+    <string name="customers">گاہک</string>
+    <string name="search_name_phone">نام یا فون نمبر سے تلاش کریں</string>
+    <string name="filter_all">تمام</string>
+    <string name="filter_owe_money">واجب الادا</string>
+    <string name="no_customers_yet">ابھی کوئی گاہک شامل نہیں ہے۔\n+ پر دبائیں اور گاہک شامل کریں۔</string>
+    <string name="no_match">کوئی نتیجہ نہیں۔</string>
+    <string name="owes_amount">واجب الادا %1$s</string>
+    <string name="advance_amount">ایڈوانس %1$s</string>
+    <string name="add_customer">گاہک شامل کریں</string>
+    <string name="edit_customer">گاہک میں ترمیم کریں</string>
+    <string name="customer_name_req">گاہک کا نام *</string>
+    <string name="opening_arrears_hint">پرانا بقایا جو گاہک پر پہلے سے واجب ہے (اختیاری)</string>
+    <string name="err_enter_customer_name">گاہک کا نام درج کریں</string>
+    <string name="err_valid_amount">درست رقم درج کریں</string>
+    <string name="owes_you">آپ پر واجب الادا</string>
+    <string name="advance_credit">ایڈوانس رقم</string>
+    <string name="account_settled">حساب برابر ہے</string>
+    <string name="new_receipt">نئی رسید</string>
+    <string name="receive_payment">ادائیگی وصول کریں</string>
+    <string name="statement_pdf">حساب کی پی ڈی ایف</string>
+    <string name="send_reminder">یاد دہانی بھیجیں</string>
+    <string name="account_history">حساب کی تفصیل</string>
+    <string name="no_transactions_yet">ابھی کوئی لین دین نہیں ہے۔</string>
+    <string name="balance_short">بیلنس %1$s</string>
+    <string name="amount">رقم</string>
+    <string name="method">طریقہ</string>
+    <string name="note_optional">نوٹ (اختیاری)</string>
+    <string name="delete_customer_title">گاہک حذف کریں؟</string>
+    <string name="delete_customer_body">”%1$s“ ہٹا دیا جائے گا۔ پرانی رسیدوں میں نام باقی رہے گا۔</string>
+    <string name="err_customer_balance">اس گاہک پر %1$s کا بقایا ہے۔ پہلے حساب برابر کریں۔</string>
+    <string name="reminder_message">محترم %1$s، %2$s کے پاس آپ کا بقایا %3$s ہے۔ براہ کرم جلد از جلد ادائیگی کریں۔ شکریہ۔</string>
+
+    <string name="method_cash">نقد</string>
+    <string name="method_bank">بینک</string>
+    <string name="method_jazzcash">جاز کیش</string>
+    <string name="method_easypaisa">ایزی پیسہ</string>
+    <string name="method_cheque">چیک</string>
+
+    <!-- New order -->
+    <string name="new_receipt_title">نئی رسید</string>
+    <string name="walk_in_tap_to_choose">عام گاہک (منتخب کرنے کے لیے دبائیں)</string>
+    <string name="change">تبدیل کریں</string>
+    <string name="previous_arrears">پرانا بقایا: %1$s</string>
+    <string name="advance_credit_amount">ایڈوانس رقم: %1$s</string>
+    <string name="no_arrears">کوئی بقایا نہیں</string>
+    <string name="payment_colon">ادائیگی:</string>
+    <string name="add_products">اشیاء شامل کریں</string>
+    <string name="custom_item">اپنی چیز شامل کریں</string>
+    <string name="no_items_yet">ابھی کوئی چیز شامل نہیں ہے۔</string>
+    <string name="qty_unit">مقدار (%1$s)</string>
+    <string name="price">قیمت</string>
+    <string name="subtotal">ذیلی کل</string>
+    <string name="discount_currency">رعایت (%1$s)</string>
+    <string name="bill_total">بل کی کل رقم</string>
+    <string name="received_now">ابھی وصول شدہ رقم</string>
+    <string name="received_now_arrears">ابھی وصول شدہ رقم (پرانا بقایا بھی شامل ہو سکتا ہے)</string>
+    <string name="left_unpaid">اس بل پر باقی رقم</string>
+    <string name="applied_to_arrears">پرانے بقایا میں شامل کی گئی</string>
+    <string name="customer_will_owe">گاہک پر کل بقایا ہوگا</string>
+    <string name="note_on_receipt">رسید پر نوٹ (اختیاری)</string>
+    <string name="generate_receipt">رسید بنائیں</string>
+    <string name="saving">محفوظ ہو رہا ہے…</string>
+    <string name="choose_customer">گاہک منتخب کریں</string>
+    <string name="walk_in_no_record">عام گاہک (ریکارڈ نہیں رکھا جائے گا)</string>
+    <string name="new_customer_plus">+ نیا گاہک</string>
+    <string name="tap_products_to_add">شامل کرنے کے لیے اشیاء پر دبائیں</string>
+    <string name="no_products_add_hint">کوئی چیز موجود نہیں۔ ہوم اسکرین سے اشیاء شامل کریں، یا اپنی چیز استعمال کریں۔</string>
+    <string name="item_name">چیز کا نام</string>
+    <string name="quantity">مقدار</string>
+    <string name="done_count">مکمل (%1$d)</string>
+    <string name="err_add_product">کم از کم ایک چیز شامل کریں</string>
+    <string name="err_qty">مقدار صفر سے زیادہ ہونی چاہیے</string>
+    <string name="err_price_negative">قیمت منفی نہیں ہو سکتی</string>
+    <string name="err_credit_customer">ادھار فروخت کے لیے گاہک منتخب کریں</string>
+    <string name="err_business_not_found">کاروبار نہیں ملا</string>
+    <string name="err_more_than_bill">وصول شدہ رقم بل سے زیادہ ہے</string>
+    <string name="err_more_than_arrears">وصول شدہ رقم بل + پرانے بقایا سے زیادہ ہے</string>
+    <string name="err_amount">رقم صفر سے زیادہ ہونی چاہیے</string>
+
+    <!-- Orders -->
+    <string name="receipts">رسیدیں</string>
+    <string name="search_customer_receipt">گاہک یا رسید نمبر تلاش کریں</string>
+    <string name="no_receipts_period">اس مدت میں کوئی رسید نہیں ہے۔</string>
+    <string name="total_sales">کل فروخت</string>
+    <string name="received">وصول شدہ</string>
+    <string name="unpaid_on_bills">ان بلوں پر باقی رقم</string>
+    <string name="status_paid">ادا شدہ</string>
+    <string name="status_partial">جزوی</string>
+    <string name="status_unpaid">غیر ادا شدہ</string>
+    <string name="status_cancelled">منسوخ</string>
+    <string name="pdf">پی ڈی ایف</string>
+    <string name="image">تصویر</string>
+    <string name="cancel_this_receipt">یہ رسید منسوخ کریں</string>
+    <string name="cancel_receipt_title">رسید منسوخ کریں؟</string>
+    <string name="cancel_receipt_body">رسید آپ کے ریکارڈ میں ”منسوخ“ کے نشان کے ساتھ رہے گی، اسٹاک واپس آ جائے گا اور گاہک کا بیلنس درست ہو جائے گا۔ یہ عمل واپس نہیں ہو سکتا۔</string>
+    <string name="receipt_cancelled">رسید منسوخ کر دی گئی</string>
+    <string name="export_pdf">پی ڈی ایف ایکسپورٹ کریں</string>
+    <string name="export_excel">ایکسل ایکسپورٹ کریں</string>
+    <string name="share_pdf_report">پی ڈی ایف رپورٹ شیئر کریں</string>
+    <string name="share_excel_file">ایکسل فائل شیئر کریں</string>
+    <string name="share_receipt_pdf">رسید کی پی ڈی ایف شیئر کریں</string>
+    <string name="share_receipt_image">رسید کی تصویر شیئر کریں</string>
+    <string name="share_statement">حساب کی تفصیل شیئر کریں</string>
+    <string name="send_reminder_title">یاد دہانی بھیجیں</string>
+
+    <!-- Date range -->
+    <string name="range_today">آج</string>
+    <string name="range_7_days">7 دن</string>
+    <string name="range_month">مہینہ</string>
+    <string name="range_all_time">تمام وقت</string>
+    <string name="range_pick_dates">تاریخیں منتخب کریں</string>
+    <string name="range_start_date">شروع کی تاریخ</string>
+    <string name="range_end_date">آخری تاریخ</string>
+    <string name="range_next_end_date">اگلا: آخری تاریخ</string>
+    <string name="range_apply">لاگو کریں</string>
+
+    <!-- Cash -->
+    <string name="payments_and_expenses">ادائیگیاں اور اخراجات</string>
+    <string name="money_in">آنے والی رقم</string>
+    <string name="money_out">جانے والی رقم</string>
+    <string name="total_received">کل وصولی (بقایا/ادائیگیاں)</string>
+    <string name="total_spent">کل خرچ</string>
+    <string name="no_payments_period">اس مدت میں کوئی ادائیگی نہیں ہے۔\nگاہکوں سے وصول شدہ ادائیگیاں یہاں نظر آئیں گی۔</string>
+    <string name="no_expenses_period">اس مدت میں کوئی خرچ نہیں ہے۔\nکرایہ، تنخواہیں، سپلائر کی ادائیگیاں درج کریں…</string>
+    <string name="customer_label">گاہک</string>
+    <string name="add_expense">خرچ شامل کریں</string>
+    <string name="category">قسم</string>
+    <string name="err_choose_customer">گاہک منتخب کریں</string>
+    <string name="delete_payment_title">یہ ادائیگی حذف کریں؟</string>
+    <string name="delete_payment_body">%1$s کی رقم %2$s سے۔ گاہک کا بقایا دوبارہ بڑھ جائے گا۔</string>
+    <string name="delete_expense_title">یہ خرچ حذف کریں؟</string>
+
+    <string name="cat_supplier_payment">سپلائر کی ادائیگی</string>
+    <string name="cat_rent">کرایہ</string>
+    <string name="cat_salaries">تنخواہیں</string>
+    <string name="cat_utilities">بجلی، پانی، گیس</string>
+    <string name="cat_transport">آمدورفت</string>
+    <string name="cat_other">دیگر</string>
+
+    <!-- Reports -->
+    <string name="reports_and_export">رپورٹس اور ایکسپورٹ</string>
+    <string name="cash_flow">نقدی کا بہاؤ</string>
+    <string name="received_at_sale">فروخت پر وصول شدہ</string>
+    <string name="arrears_payments_received">بقایا/ادائیگیاں وصول شدہ</string>
+    <string name="total_cash_in">کل آنے والی نقدی</string>
+    <string name="expenses_supplier_payments">اخراجات اور سپلائر کی ادائیگیاں</string>
+    <string name="net_cash_flow">خالص نقدی کا بہاؤ</string>
+    <string name="new_credit_given">نیا ادھار دیا گیا (غیر ادا شدہ)</string>
+    <string name="top_products">سب سے زیادہ فروخت ہونے والی اشیاء</string>
+    <string name="no_sales_period">اس مدت میں کوئی فروخت نہیں ہے۔</string>
+    <string name="customers_who_owe_now">وہ گاہک جن پر بقایا ہے (ابھی)</string>
+    <string name="nobody_owes_you">کسی پر بھی بقایا نہیں ہے۔</string>
+    <string name="total_to_collect">کل وصول کرنی ہے</string>
+    <string name="export_for">%1$s کے لیے ایکسپورٹ</string>
+    <string name="export_excel_full">ایکسل (رسیدیں، اشیاء، ادائیگیاں، اخراجات)</string>
+    <string name="export_pdf_receipts">پی ڈی ایف – رسیدوں کی فہرست</string>
+    <string name="export_pdf_summary">پی ڈی ایف – نقدی کا خلاصہ</string>
+
+    <!-- Receipt (printed) -->
+    <string name="rc_receipt_no">رسید نمبر</string>
+    <string name="rc_date">تاریخ</string>
+    <string name="rc_customer">گاہک</string>
+    <string name="rc_walk_in">عام گاہک</string>
+    <string name="rc_phone">فون</string>
+    <string name="rc_payment">ادائیگی</string>
+    <string name="rc_cash">نقد</string>
+    <string name="rc_credit">ادھار</string>
+    <string name="rc_item">چیز</string>
+    <string name="rc_qty">مقدار</string>
+    <string name="rc_price">قیمت</string>
+    <string name="rc_total">کل</string>
+    <string name="rc_subtotal">ذیلی کل</string>
+    <string name="rc_discount">رعایت</string>
+    <string name="rc_received">وصول شدہ</string>
+    <string name="rc_bill_balance">بل کا بقایا</string>
+    <string name="rc_previous_arrears">پرانا بقایا</string>
+    <string name="rc_arrears_received">بقایا وصول شدہ</string>
+    <string name="rc_total_arrears">کل بقایا</string>
+    <string name="rc_advance_credit">ایڈوانس رقم</string>
+    <string name="rc_made_with">رسید بک سے بنایا گیا</string>
+    <string name="rc_cancelled_stamp">منسوخ</string>
+
+    <!-- Ledger -->
+    <string name="ledger_receipt">رسید %1$s</string>
+    <string name="ledger_paid_on">%1$s پر ادا شدہ</string>
+    <string name="ledger_arrears_with">%1$s کے ساتھ بقایا وصول شدہ</string>
+    <string name="ledger_payment">ادائیگی (%1$s)</string>
+    <string name="ledger_opening">ابتدائی بیلنس</string>
+
+    <!-- Report tables -->
+    <string name="rp_sales_title">فروخت / رسیدیں - %1$s</string>
+    <string name="rp_summary_title">نقدی کا خلاصہ - %1$s</string>
+    <string name="rp_statement_title">گاہک کا حساب - %1$s</string>
+    <string name="rp_stock_title">اسٹاک / قیمت کی فہرست - %1$s</string>
+    <string name="rp_col_receipt">رسید</string>
+    <string name="rp_col_date">تاریخ</string>
+    <string name="rp_col_customer">گاہک</string>
+    <string name="rp_col_term">شرط</string>
+    <string name="rp_col_total">کل</string>
+    <string name="rp_col_paid">ادا شدہ</string>
+    <string name="rp_col_due">باقی</string>
+    <string name="rp_col_item">چیز</string>
+    <string name="rp_col_amount">رقم</string>
+    <string name="rp_col_details">تفصیل</string>
+    <string name="rp_col_debit">ڈیبٹ (بل)</string>
+    <string name="rp_col_credit">کریڈٹ (ادا شدہ)</string>
+    <string name="rp_col_balance">بیلنس</string>
+    <string name="rp_col_product">چیز</string>
+    <string name="rp_col_unit">اکائی</string>
+    <string name="rp_col_price">قیمت</string>
+    <string name="rp_col_stock">اسٹاک</string>
+    <string name="rp_walk_in">عام گاہک</string>
+    <string name="rp_cancelled_suffix"> (منسوخ)</string>
+    <string name="rp_receipts_active">رسیدیں (فعال)</string>
+    <string name="rp_total_sales">کل فروخت</string>
+    <string name="rp_received_at_sale">فروخت پر وصول شدہ</string>
+    <string name="rp_credit_unpaid">ادھار پر فروخت (غیر ادا شدہ)</string>
+    <string name="rp_amount_due">گاہک سے وصول کرنی ہے</string>
+    <string name="rp_advance_credit">ایڈوانس رقم</string>
+    <string name="rp_total_cash_in">کل آنے والی نقدی</string>
+    <string name="rp_net_cash_flow">خالص نقدی کا بہاؤ</string>
+    <string name="rp_new_credit">نیا ادھار دیا گیا (غیر ادا شدہ)</string>
+    <string name="rp_top_products_header">سب سے زیادہ فروخت (مقدار / رقم)</string>
+    <string name="rp_debtors_header">وہ گاہک جن پر بقایا ہے</string>
+    <string name="rp_sheet_summary">خلاصہ</string>
+    <string name="rp_sheet_receipts">رسیدیں</string>
+    <string name="rp_sheet_items">اشیاء</string>
+    <string name="rp_sheet_payments">ادائیگیاں</string>
+    <string name="rp_sheet_expenses">اخراجات</string>
+    <string name="rp_sheet_products">اشیاء</string>
+    <string name="rp_business">کاروبار</string>
+    <string name="rp_period">مدت</string>
+</resources>

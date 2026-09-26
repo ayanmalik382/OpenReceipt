@@ -1,0 +1,403 @@
+<resources>
+    <string name="app_name">ReceiptBook</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="edit">Edit</string>
+    <string name="add">Add</string>
+    <string name="done">Done</string>
+    <string name="none">None</string>
+    <string name="search">Search</string>
+    <string name="all">All</string>
+    <string name="optional">Optional</string>
+    <string name="today">Today</string>
+    <string name="settled">Settled</string>
+
+    <!-- Auth -->
+    <string name="auth_tagline">Your receipts and customers stay on your phone and are backed up when online.</string>
+    <string name="sign_in">Sign in</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="create_account">Create account</string>
+    <string name="register_tagline">We will email you a 6-digit code to confirm your email.</string>
+    <string name="password_hint">Password (8+ characters)</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="send_code">Send code</string>
+    <string name="already_have_account">I already have an account</string>
+    <string name="enter_code">Enter code</string>
+    <string name="code_sent_to">We sent a 6-digit code to %1$s. It is valid for 10 minutes.</string>
+    <string name="code_hint">6-digit code</string>
+    <string name="verify">Verify</string>
+    <string name="send_code_again">Send code again</string>
+    <string name="code_resent">If the account exists, a new code was sent.</string>
+    <string name="reset_password">Reset password</string>
+    <string name="reset_tagline_send">We will email you a code.</string>
+    <string name="reset_tagline_enter">Enter the code from your email and choose a new password.</string>
+    <string name="change_password">Change password</string>
+    <string name="back_to_sign_in">Back to sign in</string>
+    <string name="err_enter_valid_email">Enter a valid email</string>
+    <string name="err_password_min">Password must be at least 8 characters</string>
+    <string name="err_passwords_no_match">Passwords do not match</string>
+    <string name="err_enter_email_password">Enter your email and password</string>
+    <string name="err_offline_auth">No internet connection. Internet is only needed for sign-in and registration.</string>
+
+    <!-- Server error codes (from the backend) -->
+    <string name="srv_invalid_email">Enter a valid email</string>
+    <string name="srv_password_len">Password must be 8 to 72 characters</string>
+    <string name="srv_email_exists">This email is already registered. Please sign in.</string>
+    <string name="srv_invalid_code">Invalid or expired code</string>
+    <string name="srv_invalid_credentials">Invalid email or password</string>
+    <string name="srv_unverified">Please verify your email first</string>
+    <string name="srv_wrong_password">Wrong password</string>
+    <string name="srv_session_expired">Session expired. Please sign in again.</string>
+    <string name="srv_rate_limited">Too many attempts. Please wait a minute.</string>
+    <string name="srv_server_error">Something went wrong on the server. Please try again.</string>
+    <string name="srv_invalid_request">Something went wrong. Please try again.</string>
+
+    <!-- Businesses -->
+    <string name="my_businesses">My Businesses</string>
+    <string name="add_business">Add business</string>
+    <string name="new_business">New business</string>
+    <string name="business_settings">Business settings</string>
+    <string name="no_business_yet">No business yet.\nTap “Add business” to create your first one.</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sign_out">Sign out</string>
+    <string name="delete_account">Delete account</string>
+    <string name="sign_out_confirm_title">Sign out?</string>
+    <string name="sign_out_confirm_body">Your data stays safely on this phone and will be here when you sign in again.</string>
+    <string name="delete_account_body">This permanently deletes your account, ALL businesses, receipts and customers from the server and from this phone. It cannot be undone.</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="delete_everything">Delete everything</string>
+    <string name="err_delete_account_failed">Could not delete. Check your internet connection.</string>
+    <string name="syncing">Syncing…</string>
+    <string name="backed_up_at">Backed up %1$s</string>
+    <string name="not_synced_yet">Not synced yet</string>
+    <string name="sync_offline">Offline – will sync when connected</string>
+    <string name="sync_failed">Sync failed</string>
+
+    <string name="business_name_req">Business name *</string>
+    <string name="address">Address</string>
+    <string name="business_phone">Business phone</string>
+    <string name="sales_terms_offered">Sales terms you offer</string>
+    <string name="term_cash">Cash</string>
+    <string name="term_credit">Credit (customer pays later)</string>
+    <string name="currency">Currency</string>
+    <string name="receipt_prefix">Receipt prefix</string>
+    <string name="receipt_footer">Receipt footer message</string>
+    <string name="receipt_language">Receipt language</string>
+    <string name="same_as_app">Same as app language</string>
+    <string name="supplier_names_hint">Supplier names (one per line, optional)</string>
+    <string name="create_business">Create business</string>
+    <string name="save_changes">Save changes</string>
+    <string name="delete_this_business">Delete this business</string>
+    <string name="delete_business_title">Delete business?</string>
+    <string name="delete_business_body">“%1$s” will be removed from your account. Its records are kept on the server for safety but you will no longer see them.</string>
+    <string name="err_enter_business_name">Enter the business name</string>
+    <string name="err_valid_phone">Enter a valid phone number</string>
+    <string name="err_choose_sales_term">Choose at least one sales term</string>
+    <string name="footer_default">Thank you for your business!</string>
+
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="choose_language">Choose language</string>
+    <string name="restart_hint">The app will switch instantly.</string>
+
+    <!-- Home -->
+    <string name="new_receipt_order">New receipt / order</string>
+    <string name="todays_sales">Today\'s sales</string>
+    <string name="receipts_count">%1$d receipts</string>
+    <string name="cash_in_today">Cash in today</string>
+    <string name="out_amount">Out: %1$s</string>
+    <string name="customers_owe_you">Customers owe you</string>
+    <string name="customers_count">%1$d customers</string>
+    <string name="low_stock">Low stock</string>
+    <string name="products_to_refill">products to refill</string>
+    <string name="tile_receipts">Receipts</string>
+    <string name="tile_customers">Customers</string>
+    <string name="tile_products">Products &amp; stock</string>
+    <string name="tile_suppliers">Suppliers</string>
+    <string name="tile_cash">Payments &amp; expenses</string>
+    <string name="tile_reports">Reports &amp; export</string>
+
+    <!-- Products -->
+    <string name="products_and_stock">Products &amp; stock</string>
+    <string name="search_products">Search products</string>
+    <string name="no_products_yet">No products yet.\nTap + to add products with their price.</string>
+    <string name="stock_line">Stock: %1$s %2$s</string>
+    <string name="low_stock_suffix">  •  LOW STOCK</string>
+    <string name="per_unit">per %1$s</string>
+    <string name="add_product">Add product</string>
+    <string name="edit_product">Edit product</string>
+    <string name="product_name_req">Product name *</string>
+    <string name="selling_price_req">Selling price *</string>
+    <string name="unit">Unit</string>
+    <string name="cost_price_optional">Cost price (optional)</string>
+    <string name="supplier">Supplier</string>
+    <string name="track_stock">Track stock quantity</string>
+    <string name="current_stock">Current stock</string>
+    <string name="low_stock_warn_at">Warn me when stock is at or below</string>
+    <string name="err_enter_product_name">Enter product name</string>
+    <string name="err_valid_price">Enter a valid price</string>
+    <string name="delete_product_title">Delete product?</string>
+    <string name="delete_product_body">“%1$s” will be removed. Old receipts keep their history.</string>
+    <string name="export_stock_list">Export stock list</string>
+    <string name="only_x_in_stock">Only %1$s %2$s in stock</string>
+
+    <string name="unit_pcs">pcs</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_dozen">dozen</string>
+    <string name="unit_meter">meter</string>
+    <string name="unit_liter">liter</string>
+    <string name="unit_box">box</string>
+    <string name="unit_bag">bag</string>
+
+    <!-- Suppliers -->
+    <string name="suppliers">Suppliers</string>
+    <string name="no_suppliers_yet">No suppliers yet.</string>
+    <string name="add_supplier">Add supplier</string>
+    <string name="edit_supplier">Edit supplier</string>
+    <string name="supplier_name_req">Supplier name *</string>
+    <string name="phone">Phone</string>
+    <string name="delete_supplier_title">Delete supplier?</string>
+    <string name="delete_supplier_body">“%1$s” will be removed.</string>
+
+    <!-- Customers -->
+    <string name="customers">Customers</string>
+    <string name="search_name_phone">Search name or phone</string>
+    <string name="filter_all">All</string>
+    <string name="filter_owe_money">Owe money</string>
+    <string name="no_customers_yet">No customers yet.\nTap + to add one.</string>
+    <string name="no_match">No match.</string>
+    <string name="owes_amount">Owes %1$s</string>
+    <string name="advance_amount">Advance %1$s</string>
+    <string name="add_customer">Add customer</string>
+    <string name="edit_customer">Edit customer</string>
+    <string name="customer_name_req">Customer name *</string>
+    <string name="opening_arrears_hint">Old arrears he already owes (optional)</string>
+    <string name="err_enter_customer_name">Enter customer name</string>
+    <string name="err_valid_amount">Enter a valid amount</string>
+    <string name="owes_you">Owes you</string>
+    <string name="advance_credit">Advance credit</string>
+    <string name="account_settled">Account settled</string>
+    <string name="new_receipt">New receipt</string>
+    <string name="receive_payment">Receive payment</string>
+    <string name="statement_pdf">Statement PDF</string>
+    <string name="send_reminder">Send reminder</string>
+    <string name="account_history">Account history</string>
+    <string name="no_transactions_yet">No transactions yet.</string>
+    <string name="balance_short">Bal %1$s</string>
+    <string name="amount">Amount</string>
+    <string name="method">Method</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="delete_customer_title">Delete customer?</string>
+    <string name="delete_customer_body">“%1$s” will be removed. Old receipts keep the name.</string>
+    <string name="err_customer_balance">This customer has an unpaid balance of %1$s. Settle it first.</string>
+    <string name="reminder_message">Dear %1$s, your outstanding balance at %2$s is %3$s. Please pay at your earliest convenience. Thank you.</string>
+
+    <string name="method_cash">Cash</string>
+    <string name="method_bank">Bank</string>
+    <string name="method_jazzcash">JazzCash</string>
+    <string name="method_easypaisa">Easypaisa</string>
+    <string name="method_cheque">Cheque</string>
+
+    <!-- New order -->
+    <string name="new_receipt_title">New receipt</string>
+    <string name="walk_in_tap_to_choose">Walk-in customer (tap to choose)</string>
+    <string name="change">Change</string>
+    <string name="previous_arrears">Previous arrears: %1$s</string>
+    <string name="advance_credit_amount">Advance credit: %1$s</string>
+    <string name="no_arrears">No arrears</string>
+    <string name="payment_colon">Payment:</string>
+    <string name="add_products">Add products</string>
+    <string name="custom_item">Custom item</string>
+    <string name="no_items_yet">No items yet.</string>
+    <string name="qty_unit">Qty (%1$s)</string>
+    <string name="price">Price</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="discount_currency">Discount (%1$s)</string>
+    <string name="bill_total">Bill total</string>
+    <string name="received_now">Amount received now</string>
+    <string name="received_now_arrears">Amount received now (can include old arrears)</string>
+    <string name="left_unpaid">Left unpaid on this bill</string>
+    <string name="applied_to_arrears">Applied to old arrears</string>
+    <string name="customer_will_owe">Customer will owe (total arrears)</string>
+    <string name="note_on_receipt">Note on receipt (optional)</string>
+    <string name="generate_receipt">Generate receipt</string>
+    <string name="saving">Saving…</string>
+    <string name="choose_customer">Choose customer</string>
+    <string name="walk_in_no_record">Walk-in (no record)</string>
+    <string name="new_customer_plus">+ New customer</string>
+    <string name="tap_products_to_add">Tap products to add</string>
+    <string name="no_products_add_hint">No products. Add products from the home screen, or use a custom item.</string>
+    <string name="item_name">Item name</string>
+    <string name="quantity">Quantity</string>
+    <string name="done_count">Done (%1$d)</string>
+    <string name="err_add_product">Add at least one product</string>
+    <string name="err_qty">Quantity must be more than 0</string>
+    <string name="err_price_negative">Price cannot be negative</string>
+    <string name="err_credit_customer">Choose a customer for a credit sale</string>
+    <string name="err_business_not_found">Business not found</string>
+    <string name="err_more_than_bill">Received amount is more than the bill</string>
+    <string name="err_more_than_arrears">Received amount is more than bill + previous arrears</string>
+    <string name="err_amount">Amount must be more than 0</string>
+
+    <!-- Orders -->
+    <string name="receipts">Receipts</string>
+    <string name="search_customer_receipt">Search customer or receipt no.</string>
+    <string name="no_receipts_period">No receipts in this period.</string>
+    <string name="total_sales">Total sales</string>
+    <string name="received">Received</string>
+    <string name="unpaid_on_bills">Unpaid on these bills</string>
+    <string name="status_paid">Paid</string>
+    <string name="status_partial">Partial</string>
+    <string name="status_unpaid">Unpaid</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="pdf">PDF</string>
+    <string name="image">Image</string>
+    <string name="cancel_this_receipt">Cancel this receipt</string>
+    <string name="cancel_receipt_title">Cancel receipt?</string>
+    <string name="cancel_receipt_body">The receipt stays in your records marked CANCELLED, stock is returned and the customer\'s balance is corrected. This cannot be undone.</string>
+    <string name="receipt_cancelled">Receipt cancelled</string>
+    <string name="export_pdf">Export PDF</string>
+    <string name="export_excel">Export Excel</string>
+    <string name="share_pdf_report">Share PDF report</string>
+    <string name="share_excel_file">Share Excel file</string>
+    <string name="share_receipt_pdf">Share receipt PDF</string>
+    <string name="share_receipt_image">Share receipt image</string>
+    <string name="share_statement">Share statement</string>
+    <string name="send_reminder_title">Send reminder</string>
+
+    <!-- Date range -->
+    <string name="range_today">Today</string>
+    <string name="range_7_days">7 days</string>
+    <string name="range_month">Month</string>
+    <string name="range_all_time">All time</string>
+    <string name="range_pick_dates">Pick dates</string>
+    <string name="range_start_date">Start date</string>
+    <string name="range_end_date">End date</string>
+    <string name="range_next_end_date">Next: end date</string>
+    <string name="range_apply">Apply</string>
+
+    <!-- Cash -->
+    <string name="payments_and_expenses">Payments &amp; expenses</string>
+    <string name="money_in">Money in</string>
+    <string name="money_out">Money out</string>
+    <string name="total_received">Total received (arrears/payments)</string>
+    <string name="total_spent">Total spent</string>
+    <string name="no_payments_period">No payments in this period.\nPayments received from customers appear here.</string>
+    <string name="no_expenses_period">No expenses in this period.\nRecord rent, salaries, supplier payments…</string>
+    <string name="customer_label">Customer</string>
+    <string name="add_expense">Add expense</string>
+    <string name="category">Category</string>
+    <string name="err_choose_customer">Choose a customer</string>
+    <string name="delete_payment_title">Delete this payment?</string>
+    <string name="delete_payment_body">%1$s from %2$s. The customer\'s balance will go back up.</string>
+    <string name="delete_expense_title">Delete this expense?</string>
+
+    <string name="cat_supplier_payment">Supplier payment</string>
+    <string name="cat_rent">Rent</string>
+    <string name="cat_salaries">Salaries</string>
+    <string name="cat_utilities">Utilities</string>
+    <string name="cat_transport">Transport</string>
+    <string name="cat_other">Other</string>
+
+    <!-- Reports -->
+    <string name="reports_and_export">Reports &amp; export</string>
+    <string name="cash_flow">Cash flow</string>
+    <string name="received_at_sale">Received at sale</string>
+    <string name="arrears_payments_received">Arrears / payments received</string>
+    <string name="total_cash_in">Total cash in</string>
+    <string name="expenses_supplier_payments">Expenses &amp; supplier payments</string>
+    <string name="net_cash_flow">Net cash flow</string>
+    <string name="new_credit_given">New credit given (unpaid)</string>
+    <string name="top_products">Top products</string>
+    <string name="no_sales_period">No sales in this period.</string>
+    <string name="customers_who_owe_now">Customers who owe money (now)</string>
+    <string name="nobody_owes_you">Nobody owes you.</string>
+    <string name="total_to_collect">Total to collect</string>
+    <string name="export_for">Export for %1$s</string>
+    <string name="export_excel_full">Excel (receipts, items, payments, expenses)</string>
+    <string name="export_pdf_receipts">PDF – receipts list</string>
+    <string name="export_pdf_summary">PDF – cash flow summary</string>
+
+    <!-- Receipt (printed) -->
+    <string name="rc_receipt_no">Receipt #</string>
+    <string name="rc_date">Date</string>
+    <string name="rc_customer">Customer</string>
+    <string name="rc_walk_in">Walk-in customer</string>
+    <string name="rc_phone">Phone</string>
+    <string name="rc_payment">Payment</string>
+    <string name="rc_cash">Cash</string>
+    <string name="rc_credit">Credit</string>
+    <string name="rc_item">Item</string>
+    <string name="rc_qty">Qty</string>
+    <string name="rc_price">Price</string>
+    <string name="rc_total">Total</string>
+    <string name="rc_subtotal">Subtotal</string>
+    <string name="rc_discount">Discount</string>
+    <string name="rc_received">Received</string>
+    <string name="rc_bill_balance">Bill balance</string>
+    <string name="rc_previous_arrears">Previous arrears</string>
+    <string name="rc_arrears_received">Arrears received</string>
+    <string name="rc_total_arrears">Total arrears</string>
+    <string name="rc_advance_credit">Advance credit</string>
+    <string name="rc_made_with">Made with ReceiptBook</string>
+    <string name="rc_cancelled_stamp">CANCELLED</string>
+
+    <!-- Ledger -->
+    <string name="ledger_receipt">Receipt %1$s</string>
+    <string name="ledger_paid_on">Paid on %1$s</string>
+    <string name="ledger_arrears_with">Arrears received with %1$s</string>
+    <string name="ledger_payment">Payment (%1$s)</string>
+    <string name="ledger_opening">Opening balance</string>
+
+    <!-- Report tables -->
+    <string name="rp_sales_title">Sales / Receipts - %1$s</string>
+    <string name="rp_summary_title">Cash Flow Summary - %1$s</string>
+    <string name="rp_statement_title">Customer Statement - %1$s</string>
+    <string name="rp_stock_title">Stock / Price List - %1$s</string>
+    <string name="rp_col_receipt">Receipt</string>
+    <string name="rp_col_date">Date</string>
+    <string name="rp_col_customer">Customer</string>
+    <string name="rp_col_term">Term</string>
+    <string name="rp_col_total">Total</string>
+    <string name="rp_col_paid">Paid</string>
+    <string name="rp_col_due">Due</string>
+    <string name="rp_col_item">Item</string>
+    <string name="rp_col_amount">Amount</string>
+    <string name="rp_col_details">Details</string>
+    <string name="rp_col_debit">Debit (bill)</string>
+    <string name="rp_col_credit">Credit (paid)</string>
+    <string name="rp_col_balance">Balance</string>
+    <string name="rp_col_product">Product</string>
+    <string name="rp_col_unit">Unit</string>
+    <string name="rp_col_price">Price</string>
+    <string name="rp_col_stock">Stock</string>
+    <string name="rp_walk_in">Walk-in</string>
+    <string name="rp_cancelled_suffix"> (CANCELLED)</string>
+    <string name="rp_receipts_active">Receipts (active)</string>
+    <string name="rp_total_sales">Total sales</string>
+    <string name="rp_received_at_sale">Received at sale</string>
+    <string name="rp_credit_unpaid">Sold on credit (unpaid)</string>
+    <string name="rp_amount_due">Amount due from customer</string>
+    <string name="rp_advance_credit">Advance credit</string>
+    <string name="rp_total_cash_in">TOTAL CASH IN</string>
+    <string name="rp_net_cash_flow">NET CASH FLOW</string>
+    <string name="rp_new_credit">New credit given (unpaid)</string>
+    <string name="rp_top_products_header">TOP PRODUCTS (qty / sales)</string>
+    <string name="rp_debtors_header">CUSTOMERS WHO OWE MONEY</string>
+    <string name="rp_sheet_summary">Summary</string>
+    <string name="rp_sheet_receipts">Receipts</string>
+    <string name="rp_sheet_items">Items</string>
+    <string name="rp_sheet_payments">Payments</string>
+    <string name="rp_sheet_expenses">Expenses</string>
+    <string name="rp_sheet_products">Products</string>
+    <string name="rp_business">Business</string>
+    <string name="rp_period">Period</string>
+</resources>
