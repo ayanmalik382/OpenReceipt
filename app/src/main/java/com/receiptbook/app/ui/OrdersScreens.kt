@@ -25,6 +25,7 @@ import com.receiptbook.app.AppContainer
 import com.receiptbook.app.R
 import com.receiptbook.app.data.*
 import com.receiptbook.app.export.Exporter
+import com.receiptbook.app.export.ReceiptTemplates
 import com.receiptbook.app.export.Reports
 import com.receiptbook.app.i18n.L
 import com.receiptbook.app.i18n.money
@@ -130,7 +131,9 @@ fun OrderDetailScreen(c: AppContainer, bid: String, oid: String, onBack: () -> U
     val bitmap by produceState<Bitmap?>(initialValue = null, order, biz) {
         val o = order
         val b = biz
-        value = if (o != null && b != null) withContext(Dispatchers.Default) { Exporter.receiptBitmap(L.receiptLoc(b), b, o, dao.items(o.id)) } else null
+        value = if (o != null && b != null) {
+            withContext(Dispatchers.Default) { Exporter.receiptBitmap(L.receiptLoc(b), ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) }
+        } else null
     }
 
     AppScaffold(order?.receiptNo ?: loc.t(R.string.receipts), onBack, snackbar = snack) { pad ->
@@ -146,13 +149,13 @@ fun OrderDetailScreen(c: AppContainer, bid: String, oid: String, onBack: () -> U
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(modifier = Modifier.weight(1f), onClick = {
                         scope.launch {
-                            val f = withContext(Dispatchers.IO) { Exporter.receiptPdf(ctx, rloc, b, o, dao.items(o.id)) }
+                            val f = withContext(Dispatchers.IO) { Exporter.receiptPdf(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) }
                             Exporter.share(ctx, f, Exporter.PDF, loc.t(R.string.share_receipt_pdf))
                         }
                     }) { Icon(Icons.Filled.PictureAsPdf, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.pdf)) }
                     Button(modifier = Modifier.weight(1f), onClick = {
                         scope.launch {
-                            val f = withContext(Dispatchers.IO) { Exporter.receiptPng(ctx, rloc, b, o, dao.items(o.id)) }
+                            val f = withContext(Dispatchers.IO) { Exporter.receiptPng(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) }
                             Exporter.share(ctx, f, Exporter.PNG, loc.t(R.string.share_receipt_image))
                         }
                     }) { Icon(Icons.Filled.Image, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.image)) }

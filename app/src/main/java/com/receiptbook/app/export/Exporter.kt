@@ -38,23 +38,23 @@ object Exporter {
     private fun safe(s: String) = s.replace(Regex("[^A-Za-z0-9._-]"), "_")
 
     // ---------- Receipt ----------
-    fun receiptBitmap(loc: Loc, b: Business, o: SaleOrder, items: List<OrderItem>): Bitmap {
-        val h = Math.ceil(ReceiptRenderer.render(null, loc, b, o, items).toDouble()).toInt()
+    fun receiptBitmap(loc: Loc, style: ReceiptStyle, b: Business, o: SaleOrder, items: List<OrderItem>): Bitmap {
+        val h = Math.ceil(ReceiptRenderer.render(null, loc, style, b, o, items).toDouble()).toInt()
         val scale = 2f
-        val bmp = Bitmap.createBitmap((ReceiptRenderer.WIDTH * scale).toInt(), (h * scale).toInt(), Bitmap.Config.ARGB_8888)
+        val bmp = Bitmap.createBitmap((style.paperWidth * scale).toInt(), (h * scale).toInt(), Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
         c.drawColor(Color.WHITE)
         c.scale(scale, scale)
-        ReceiptRenderer.render(c, loc, b, o, items)
+        ReceiptRenderer.render(c, loc, style, b, o, items)
         return bmp
     }
 
-    fun receiptPdf(ctx: Context, loc: Loc, b: Business, o: SaleOrder, items: List<OrderItem>): File {
-        val h = Math.ceil(ReceiptRenderer.render(null, loc, b, o, items).toDouble()).toInt()
+    fun receiptPdf(ctx: Context, loc: Loc, style: ReceiptStyle, b: Business, o: SaleOrder, items: List<OrderItem>): File {
+        val h = Math.ceil(ReceiptRenderer.render(null, loc, style, b, o, items).toDouble()).toInt()
         val doc = PdfDocument()
-        val page = doc.startPage(PdfDocument.PageInfo.Builder(ReceiptRenderer.WIDTH.toInt(), h, 1).create())
+        val page = doc.startPage(PdfDocument.PageInfo.Builder(style.paperWidth.toInt(), h, 1).create())
         page.canvas.drawColor(Color.WHITE)
-        ReceiptRenderer.render(page.canvas, loc, b, o, items)
+        ReceiptRenderer.render(page.canvas, loc, style, b, o, items)
         doc.finishPage(page)
         val f = File(dir(ctx), "Receipt_${safe(o.receiptNo)}.pdf")
         FileOutputStream(f).use { doc.writeTo(it) }
@@ -62,8 +62,8 @@ object Exporter {
         return f
     }
 
-    fun receiptPng(ctx: Context, loc: Loc, b: Business, o: SaleOrder, items: List<OrderItem>): File {
-        val bmp = receiptBitmap(loc, b, o, items)
+    fun receiptPng(ctx: Context, loc: Loc, style: ReceiptStyle, b: Business, o: SaleOrder, items: List<OrderItem>): File {
+        val bmp = receiptBitmap(loc, style, b, o, items)
         val f = File(dir(ctx), "Receipt_${safe(o.receiptNo)}.png")
         FileOutputStream(f).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()

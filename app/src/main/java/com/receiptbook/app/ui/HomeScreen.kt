@@ -63,6 +63,33 @@ fun HomeScreen(
                 Tile(Icons.Filled.Assessment, loc.t(R.string.tile_reports), Modifier.weight(1f)) { go("reports/$bid") }
             }
             Tile(Icons.Filled.Settings, loc.t(R.string.business_settings), Modifier.fillMaxWidth()) { go("business/edit/$bid") }
+            Spacer(Modifier.height(24.dp))
+
+            HorizontalDivider()
+
+            Spacer(Modifier.height(12.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "ReceiptBook",
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Text(
+                    "Developed by Conscitool",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                Text(
+                    "Contact: +92 339 8000402",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
 }

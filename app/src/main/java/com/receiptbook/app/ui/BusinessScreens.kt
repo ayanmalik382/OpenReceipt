@@ -28,10 +28,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onLoggedOut: () -> Unit) {
+fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onSignIn: () -> Unit) {
     val loc = L.current
     val email by c.session.email.collectAsStateWithLifecycle()
-    val list by remember(email) { c.db.dao().observeBusinesses(email ?: "") }.collectAsStateWithLifecycle(emptyList())
+    val list by remember { c.db.dao().observeBusinesses() }.collectAsStateWithLifecycle(emptyList())
     val sync by c.sync.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var menu by remember { mutableStateOf(false) }
@@ -44,26 +44,40 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
             IconButton(onClick = onLanguage) { Icon(Icons.Filled.Language, loc.t(R.string.language)) }
             IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, null) }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(loc.t(R.string.sync_now)) }, onClick = { menu = false; c.sync.requestNow() })
-                DropdownMenuItem(text = { Text(loc.t(R.string.sign_out)) }, onClick = { menu = false; confirmLogout = true })
-                DropdownMenuItem(text = { Text(loc.t(R.string.delete_account), color = Red) }, onClick = { menu = false; deleteAccount = true })
+                if (email == null) {
+                    DropdownMenuItem(text = { Text(loc.t(R.string.sign_in_to_back_up)) }, onClick = { menu = false; onSignIn() })
+                } else {
+                    DropdownMenuItem(text = { Text(loc.t(R.string.sync_now)) }, onClick = { menu = false; c.sync.requestNow() })
+                    DropdownMenuItem(text = { Text(loc.t(R.string.sign_out)) }, onClick = { menu = false; confirmLogout = true })
+                    DropdownMenuItem(text = { Text(loc.t(R.string.delete_account), color = Red) }, onClick = { menu = false; deleteAccount = true })
+                }
             }
         },
         fab = { ExtendedFloatingActionButton(onClick = onNew, icon = { Icon(Icons.Filled.Add, null) }, text = { Text(loc.t(R.string.add_business)) }) }
     ) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
-            val status = when {
-                sync.running -> loc.t(R.string.syncing)
-                sync.errorText != null -> sync.errorText!!
-                sync.errorRes != null -> loc.t(sync.errorRes!!)
-                sync.lastOk > 0 -> loc.t(R.string.backed_up_at, loc.dateTime(sync.lastOk))
-                else -> loc.t(R.string.not_synced_yet)
+            if (email == null) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(loc.t(R.string.working_offline), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
+                    TextButton(onClick = onSignIn) { Text(loc.t(R.string.sign_in_to_back_up)) }
+                }
+            } else {
+                val status = when {
+                    sync.running -> loc.t(R.string.syncing)
+                    sync.errorText != null -> sync.errorText!!
+                    sync.errorRes != null -> loc.t(sync.errorRes!!)
+                    sync.lastOk > 0 -> loc.t(R.string.backed_up_at, loc.dateTime(sync.lastOk))
+                    else -> loc.t(R.string.not_synced_yet)
+                }
+                Text(
+                    "$email  •  $status", style = MaterialTheme.typography.labelMedium,
+                    color = if (sync.errorText != null || sync.errorRes != null) Red else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
             }
-            Text(
-                "$email  •  $status", style = MaterialTheme.typography.labelMedium,
-                color = if (sync.errorText != null || sync.errorRes != null) Red else MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
             if (list.isEmpty()) EmptyState(loc.t(R.string.no_business_yet))
             else LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(list, key = { it.id }) { b ->
@@ -86,7 +100,9 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
         loc.t(R.string.sign_out_confirm_title), loc.t(R.string.sign_out_confirm_body), loc.t(R.string.sign_out),
         onConfirm = {
             confirmLogout = false
-            scope.launch { c.sync.sync(); c.session.logout(); onLoggedOut() }
+            // Local data is untouched by signing out - it stays fully visible and usable; only
+            // the account link (and therefore future backup) goes away.
+            scope.launch { c.sync.sync(); c.session.logout() }
         }, onDismiss = { confirmLogout = false }
     )
 
@@ -110,9 +126,11 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
                     scope.launch {
                         try {
                             c.api.deleteAccount(pw)
+                            // Unlike sign-out, this is an explicit, confirmed "delete everything"
+                            // action, so it does wipe the local copy too, matching the warning above.
                             withContext(Dispatchers.IO) { c.db.clearAllTables() }
                             c.session.forgetCursor(); c.session.logout()
-                            deleteAccount = false; onLoggedOut()
+                            deleteAccount = false
                         } catch (e: Exception) {
                             err = e.message ?: loc.t(R.string.err_delete_account_failed)
                         } finally { busy = false }
@@ -125,19 +143,19 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
 }
 
 @Composable
-fun BusinessFormScreen(c: AppContainer, bid: String?, onDone: (String?) -> Unit, onBack: () -> Unit) {
+fun BusinessFormScreen(c: AppContainer, bid: String?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit) {
     val existing by produceState<Business?>(initialValue = null, bid) {
         value = if (bid == null) null else c.db.dao().business(bid)
     }
     if (bid != null && existing == null) {
         AppScaffold(L.t(R.string.business_settings), onBack) { pad -> Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
     } else {
-        BusinessForm(c, existing, onDone, onBack)
+        BusinessForm(c, existing, onDone, onBack, onTemplate)
     }
 }
 
 @Composable
-private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Unit, onBack: () -> Unit) {
+private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit) {
     val loc = L.current
     val scope = rememberCoroutineScope()
     val email by c.session.email.collectAsStateWithLifecycle()
@@ -150,6 +168,7 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
     var prefix by remember { mutableStateOf(ex?.receiptPrefix ?: "R") }
     var footer by remember { mutableStateOf(ex?.footerNote ?: "") }
     var receiptLang by remember { mutableStateOf(ex?.receiptLang ?: "") }
+    var templateId by remember { mutableStateOf(ex?.templateId ?: "classic") }
     var suppliers by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
@@ -173,7 +192,24 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 listOf(loc.t(R.string.same_as_app) to "") + Languages.all.map { it.nativeName to it.code },
                 { receiptLang = it }
             )
-            if (ex == null) Field(suppliers, { suppliers = it }, loc.t(R.string.supplier_names_hint), singleLine = false, minLines = 3)
+            if (ex == null) {
+                Field(suppliers, { suppliers = it }, loc.t(R.string.supplier_names_hint), singleLine = false, minLines = 3)
+                Text(loc.t(R.string.receipt_template), style = MaterialTheme.typography.titleSmall)
+                Picker(
+                    loc.t(R.string.receipt_template),
+                    when (templateId) {
+                        "modern" -> loc.t(R.string.template_modern); "compact" -> loc.t(R.string.template_compact)
+                        "wide" -> loc.t(R.string.template_wide); else -> loc.t(R.string.template_classic)
+                    },
+                    listOf(
+                        loc.t(R.string.template_classic) to "classic", loc.t(R.string.template_modern) to "modern",
+                        loc.t(R.string.template_compact) to "compact", loc.t(R.string.template_wide) to "wide"
+                    ),
+                    { templateId = it }
+                )
+            } else {
+                OutlinedButton(onClick = { onTemplate(ex.id) }, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.receipt_template)) }
+            }
             ErrorText(error)
             Button(modifier = Modifier.fillMaxWidth(), onClick = {
                 val digits = phone.count { it.isDigit() }
@@ -185,7 +221,8 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 }
                 if (error == null) scope.launch {
                     if (ex == null) {
-                        val id = c.repo.createBusiness(email ?: "", name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines())
+                        val ownerKey = email ?: com.receiptbook.app.net.SessionStore.LOCAL_OWNER
+                        val id = c.repo.createBusiness(ownerKey, name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines(), templateId)
                         onDone(id)
                     } else {
                         c.repo.save(
@@ -200,6 +237,33 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 }
             }) { Text(if (ex == null) loc.t(R.string.create_business) else loc.t(R.string.save_changes)) }
             if (ex != null) OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.delete_this_business), color = Red) }
+            Spacer(Modifier.height(24.dp))
+
+            HorizontalDivider()
+
+            Spacer(Modifier.height(12.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "ReceiptBook",
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Text(
+                    "Developed by Conscitool",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                Text(
+                    "Contact: +92 339 8000402",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
     if (confirmDelete && ex != null) ConfirmDialog(

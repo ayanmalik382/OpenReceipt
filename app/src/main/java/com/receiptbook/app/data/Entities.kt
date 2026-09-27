@@ -34,6 +34,10 @@ data class Business(
     val footerNote: String = "",
     /** Language of printed receipts. Empty = same as the app language. */
     @ColumnInfo(defaultValue = "''") val receiptLang: String = "",
+    /** "classic" | "modern" | "compact" | "wide" | "custom" - see export/ReceiptTemplates.kt. */
+    @ColumnInfo(defaultValue = "'classic'") val templateId: String = "classic",
+    /** JSON ReceiptStyle, used only when templateId == "custom". */
+    @ColumnInfo(defaultValue = "''") val templateConfig: String = "",
     override val updatedAt: Long = 0,
     override val deleted: Boolean = false,
     override val dirty: Boolean = true

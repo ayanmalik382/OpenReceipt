@@ -39,7 +39,8 @@ class Repository(private val db: AppDatabase) {
     suspend fun createBusiness(
         email: String, name: String, address: String, phone: String,
         cash: Boolean, credit: Boolean, currency: String, prefix: String, footer: String,
-        receiptLang: String, supplierNames: List<String>
+        receiptLang: String, supplierNames: List<String>,
+        templateId: String = "classic", templateConfig: String = ""
     ): String {
         val id = newId()
         val t = now()
@@ -49,7 +50,8 @@ class Repository(private val db: AppDatabase) {
                     id = id, ownerEmail = email, name = name.trim(), address = address.trim(), phone = phone.trim(),
                     allowCash = cash, allowCredit = credit, currency = currency.trim().ifBlank { "Rs" },
                     receiptPrefix = prefix.trim().ifBlank { "R" }, nextReceiptNo = 1, footerNote = footer.trim(),
-                    receiptLang = receiptLang, updatedAt = t, deleted = false, dirty = true
+                    receiptLang = receiptLang, templateId = templateId, templateConfig = templateConfig,
+                    updatedAt = t, deleted = false, dirty = true
                 )
             )
             supplierNames.map { it.trim() }.filter { it.isNotEmpty() }.distinct().forEach {

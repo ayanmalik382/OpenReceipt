@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -88,7 +89,10 @@ class AuthViewModel(private val c: AppContainer) : ViewModel() {
 }
 
 @Composable
-private fun AuthColumn(title: String, subtitle: String, onLanguage: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
+private fun AuthColumn(
+    title: String, subtitle: String, onLanguage: (() -> Unit)? = null, onBack: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
     Box(Modifier.fillMaxSize()) {
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp).statusBarsPadding().imePadding(),
@@ -100,6 +104,9 @@ private fun AuthColumn(title: String, subtitle: String, onLanguage: (() -> Unit)
             Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
             content()
         }
+        if (onBack != null) IconButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp)) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, L.t(R.string.back))
+        }
         if (onLanguage != null) IconButton(onClick = onLanguage, modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(8.dp)) {
             Icon(Icons.Filled.Language, L.t(R.string.language), tint = MaterialTheme.colorScheme.primary)
         }
@@ -107,11 +114,14 @@ private fun AuthColumn(title: String, subtitle: String, onLanguage: (() -> Unit)
 }
 
 @Composable
-fun LoginScreen(vm: AuthViewModel, onSuccess: () -> Unit, onRegister: () -> Unit, onForgot: () -> Unit, onVerify: (String) -> Unit, onLanguage: () -> Unit) {
+fun LoginScreen(
+    vm: AuthViewModel, onSuccess: () -> Unit, onRegister: () -> Unit, onForgot: () -> Unit,
+    onVerify: (String) -> Unit, onLanguage: () -> Unit, onContinueOffline: (() -> Unit)? = null
+) {
     val loc = L.current
     var email by remember { mutableStateOf("") }
     var pw by remember { mutableStateOf("") }
-    AuthColumn(loc.t(R.string.sign_in), loc.t(R.string.auth_tagline), onLanguage) {
+    AuthColumn(loc.t(R.string.sign_in), loc.t(R.string.auth_tagline), onLanguage, onBack = onContinueOffline) {
         Field(email, { email = it }, loc.t(R.string.email), keyboard = KeyboardType.Email)
         Field(pw, { pw = it }, loc.t(R.string.password), password = true)
         ErrorText(vm.error)
@@ -120,6 +130,11 @@ fun LoginScreen(vm: AuthViewModel, onSuccess: () -> Unit, onRegister: () -> Unit
         }
         TextButton(onClick = onForgot, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text(loc.t(R.string.forgot_password)) }
         OutlinedButton(onClick = onRegister, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.create_new_account)) }
+        if (onContinueOffline != null) {
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+            Text(loc.t(R.string.offline_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+            TextButton(onClick = onContinueOffline, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.continue_offline)) }
+        }
     }
 }
 

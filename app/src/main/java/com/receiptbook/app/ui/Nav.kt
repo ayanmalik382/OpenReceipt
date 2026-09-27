@@ -2,7 +2,6 @@ package com.receiptbook.app.ui
 
 import android.net.Uri
 import androidx.compose.runtime.*
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,30 +10,26 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.receiptbook.app.AppContainer
 
-private val authRoutes = setOf("login", "register", "verify/{email}", "forgot")
-
+/**
+ * Offline-first: the app always opens straight into the businesses list, fully usable with no
+ * account. "login" is only ever reached by an explicit tap ("Sign in to back up"), so popping
+ * back from it and "continue without an account" are the same action - both just return to
+ * whatever the person was doing, now still signed out.
+ */
 @Composable
 fun AppNav(c: AppContainer) {
     val nav = rememberNavController()
-    val email by c.session.email.collectAsStateWithLifecycle()
-    val start = remember { if (c.session.email.value == null) "login" else "businesses" }
-
-    // If the session disappears while inside the app, return to the login screen.
-    LaunchedEffect(email) {
-        val route = nav.currentDestination?.route
-        if (email == null && route != null && route !in authRoutes) nav.navigate("login") { popUpTo(0) }
-    }
 
     fun toBusinesses() = nav.navigate("businesses") { popUpTo(0) }
     fun s(e: androidx.navigation.NavBackStackEntry, k: String): String = e.arguments?.getString(k) ?: ""
 
-    NavHost(nav, startDestination = start) {
-        // ---- auth
+    NavHost(nav, startDestination = "businesses") {
+        // ---- auth (opt-in only, for cloud backup)
         composable("login") {
             val vm = vm { AuthViewModel(c) }
-            LoginScreen(vm, onSuccess = { toBusinesses() }, onRegister = { nav.navigate("register") },
+            LoginScreen(vm, onSuccess = { nav.popBackStack() }, onRegister = { nav.navigate("register") },
                 onForgot = { nav.navigate("forgot") }, onVerify = { nav.navigate("verify/${Uri.encode(it)}") },
-                onLanguage = { nav.navigate("language") })
+                onLanguage = { nav.navigate("language") }, onContinueOffline = { nav.popBackStack() })
         }
         composable("register") {
             val vm = vm { AuthViewModel(c) }
@@ -52,16 +47,18 @@ fun AppNav(c: AppContainer) {
         // ---- businesses
         composable("businesses") {
             BusinessListScreen(c, onOpen = { nav.navigate("home/$it") }, onNew = { nav.navigate("business/new") },
-                onLanguage = { nav.navigate("language") },
-                onLoggedOut = { nav.navigate("login") { popUpTo(0) } })
+                onLanguage = { nav.navigate("language") }, onSignIn = { nav.navigate("login") })
         }
         composable("language") { LanguageScreen(onBack = { nav.popBackStack() }) }
         composable("business/new") {
-            BusinessFormScreen(c, null, onDone = { id -> if (id != null) nav.navigate("home/$id") { popUpTo("businesses") } else nav.popBackStack() }, onBack = { nav.popBackStack() })
+            BusinessFormScreen(c, null, onDone = { id -> if (id != null) nav.navigate("home/$id") { popUpTo("businesses") } else nav.popBackStack() },
+                onBack = { nav.popBackStack() }, onTemplate = {})
         }
         composable("business/edit/{bid}") { e ->
-            BusinessFormScreen(c, s(e, "bid"), onDone = { r -> if (r == "DELETED") nav.popBackStack("businesses", false) else nav.popBackStack() }, onBack = { nav.popBackStack() })
+            BusinessFormScreen(c, s(e, "bid"), onDone = { r -> if (r == "DELETED") nav.popBackStack("businesses", false) else nav.popBackStack() },
+                onBack = { nav.popBackStack() }, onTemplate = { bid -> nav.navigate("business/template/$bid") })
         }
+        composable("business/template/{bid}") { e -> TemplateScreen(c, s(e, "bid"), onBack = { nav.popBackStack() }) }
 
         // ---- inside a business
         composable("home/{bid}") { e -> HomeScreen(c, s(e, "bid"), onBack = { nav.popBackStack() }, go = { nav.navigate(it) }) }

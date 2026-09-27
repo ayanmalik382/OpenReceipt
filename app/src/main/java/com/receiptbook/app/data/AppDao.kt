@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AppDao {
     // ---- Business
-    @Query("SELECT * FROM businesses WHERE ownerEmail = :email AND deleted = 0 ORDER BY name COLLATE NOCASE")
-    fun observeBusinesses(email: String): Flow<List<Business>>
+    // Deliberately NOT filtered by ownerEmail: this app is offline-first, so every business ever
+    // created on this device stays visible and usable whether or not the person is signed in.
+    // ownerEmail is written for informational/sync purposes only (see Repository.createBusiness).
+    @Query("SELECT * FROM businesses WHERE deleted = 0 ORDER BY name COLLATE NOCASE")
+    fun observeBusinesses(): Flow<List<Business>>
     @Query("SELECT * FROM businesses WHERE id = :id") fun observeBusiness(id: String): Flow<Business?>
     @Query("SELECT * FROM businesses WHERE id = :id") suspend fun business(id: String): Business?
     @Upsert suspend fun upsertBusiness(b: Business)

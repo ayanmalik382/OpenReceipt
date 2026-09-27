@@ -1,4 +1,3 @@
-require('dotenv').config();
 'use strict';
 const nodemailer = require('nodemailer');
 

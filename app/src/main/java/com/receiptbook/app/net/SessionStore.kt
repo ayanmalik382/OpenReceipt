@@ -40,4 +40,11 @@ class SessionStore(context: Context) {
     }
 
     fun forgetCursor() { prefs.edit().remove("cursor:${_email.value}").remove("lastSync:${_email.value}").apply() }
+
+    companion object {
+        /** Tag used on data created while nobody is signed in. See Repository/BusinessListScreen:
+         * the local database is always fully visible and usable regardless of login state -
+         * signing in only adds cloud backup, it never gates local access. */
+        const val LOCAL_OWNER = "local"
+    }
 }

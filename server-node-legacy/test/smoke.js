@@ -1,4 +1,3 @@
-require('dotenv').config();
 'use strict';
 const assert = require('assert');
 const Database = require('better-sqlite3');

@@ -1,4 +1,3 @@
-require('dotenv').config();
 'use strict';
 const express = require('express');
 const helmet = require('helmet');
