@@ -10,13 +10,16 @@ import java.io.File
 
 /** Builds the report files (PDF / Excel) used by the Orders and Reports screens, in Loc's language. */
 object Reports {
+    /** Every report PDF carries the business logo (if one is set) in its header. */
+    private fun pdfWithLogo(b: Business, ctx: Context, loc: Loc, fileName: String, spec: TableSpec): File =
+        Exporter.tablePdf(ctx, loc, fileName, spec, com.receiptbook.app.media.ImageStore.decode(b.logoBase64))
+
     private fun stamp(r: DateRange) = if (r.label == "All") "all" else "${Fmt.fileStamp(r.from)}-${Fmt.fileStamp(r.to)}"
 
     fun ordersPdf(ctx: Context, loc: Loc, b: Business, range: DateRange, orders: List<SaleOrder>): File {
         val cur = b.currency
         val s = Repository.summarize(orders, emptyList(), emptyList())
-        return Exporter.tablePdf(
-            ctx, loc, "Sales_${stamp(range)}.pdf",
+        return pdfWithLogo(b, ctx, loc, "Sales_${stamp(range)}.pdf",
             TableSpec(
                 title = loc.t(R.string.rp_sales_title, b.name),
                 subtitle = loc.rangeText(range),
@@ -63,8 +66,7 @@ object Reports {
         rows += listOf("", "")
         rows += listOf(loc.t(R.string.rp_debtors_header), "")
         debtors.forEach { rows += listOf(it.first, loc.money(cur, it.second)) }
-        return Exporter.tablePdf(
-            ctx, loc, "Summary_${stamp(range)}.pdf",
+        return pdfWithLogo(b, ctx, loc, "Summary_${stamp(range)}.pdf",
             TableSpec(
                 loc.t(R.string.rp_summary_title, b.name), loc.rangeText(range),
                 listOf(Triple(loc.t(R.string.rp_col_item), 3f, false), Triple(loc.t(R.string.rp_col_amount), 1.6f, true)),
@@ -75,8 +77,7 @@ object Reports {
 
     fun statementPdf(ctx: Context, loc: Loc, b: Business, c: Customer, rows: List<LedgerRow>, balance: Double): File {
         val cur = b.currency
-        return Exporter.tablePdf(
-            ctx, loc, "Statement_${c.name}.pdf",
+        return pdfWithLogo(b, ctx, loc, "Statement_${c.name}.pdf",
             TableSpec(
                 title = loc.t(R.string.rp_statement_title, c.name),
                 subtitle = "${b.name}   |   ${loc.date(System.currentTimeMillis())}",
@@ -94,8 +95,7 @@ object Reports {
     }
 
     fun stockPdf(ctx: Context, loc: Loc, b: Business, products: List<Product>): File =
-        Exporter.tablePdf(
-            ctx, loc, "Stock_${Fmt.fileStamp(System.currentTimeMillis())}.pdf",
+        pdfWithLogo(b, ctx, loc, "Stock_${Fmt.fileStamp(System.currentTimeMillis())}.pdf",
             TableSpec(
                 loc.t(R.string.rp_stock_title, b.name), loc.date(System.currentTimeMillis()),
                 listOf(
@@ -156,6 +156,85 @@ object Reports {
                 Exporter.Sheet(loc.t(R.string.rp_sheet_summary), sumSheet), Exporter.Sheet(loc.t(R.string.rp_sheet_receipts), ordersSheet),
                 Exporter.Sheet(loc.t(R.string.rp_sheet_items), itemsSheet), Exporter.Sheet(loc.t(R.string.rp_sheet_payments), paySheet),
                 Exporter.Sheet(loc.t(R.string.rp_sheet_expenses), expSheet), Exporter.Sheet(loc.t(R.string.rp_sheet_products), prodSheet)
+            )
+        )
+    }
+
+    // ---------------------------------------------------------------- Per-customer reports
+
+    /** What one customer did in a date range, plus the balance carried in and out of it. */
+    class CustomerPeriod(
+        val broughtForward: Double, val rows: List<LedgerRow>, val billed: Double, val paid: Double, val closing: Double,
+        val receipts: Int
+    )
+
+    /**
+     * [allOrders]/[allPayments] must be the customer's full history (not just the range) so the
+     * running balance is right: the range only decides which rows are shown, and the balance the
+     * customer already owed when the range began is carried in as "balance brought forward".
+     */
+    fun customerPeriod(loc: Loc, c: Customer, range: DateRange, allOrders: List<SaleOrder>, allPayments: List<Payment>): CustomerPeriod {
+        val full = Repository.ledger(loc, c, allOrders, allPayments)
+        val inRange = full.filter { it.date != 0L && it.date in range.from..range.to }
+        val bf = full.lastOrNull { it.date < range.from }?.balance ?: c.openingBalance
+        val billed = inRange.sumOf { it.debit }
+        val paid = inRange.sumOf { it.credit }
+        val closing = inRange.lastOrNull()?.balance ?: bf
+        val receipts = allOrders.count { it.status == Status.ACTIVE && it.date in range.from..range.to }
+        return CustomerPeriod(bf, inRange, billed, paid, closing, receipts)
+    }
+
+    fun customerReportPdf(ctx: Context, loc: Loc, b: Business, c: Customer, range: DateRange, p: CustomerPeriod): File {
+        val cur = b.currency
+        val rows = mutableListOf<List<String>>()
+        rows += listOf("-", loc.t(R.string.cr_brought_forward), "", "", loc.numFmt(p.broughtForward))
+        p.rows.forEach {
+            rows += listOf(loc.date(it.date), it.details, if (it.debit != 0.0) loc.numFmt(it.debit) else "",
+                if (it.credit != 0.0) loc.numFmt(it.credit) else "", loc.numFmt(it.balance))
+        }
+        return pdfWithLogo(b, ctx, loc, "Customer_${c.name}_${stamp(range)}.pdf",
+            TableSpec(
+                title = loc.t(R.string.customer_report_for, c.name),
+                subtitle = "${b.name}   |   ${loc.rangeText(range)}",
+                headers = listOf(
+                    Triple(loc.t(R.string.rp_col_date), 1.2f, false), Triple(loc.t(R.string.rp_col_details), 3f, false),
+                    Triple(loc.t(R.string.rp_col_debit), 1.2f, true), Triple(loc.t(R.string.rp_col_credit), 1.2f, true), Triple(loc.t(R.string.rp_col_balance), 1.2f, true)
+                ),
+                rows = rows,
+                summary = listOf(
+                    loc.t(R.string.rp_receipts_active) to p.receipts.toString(),
+                    loc.t(R.string.cr_total_billed) to loc.money(cur, p.billed),
+                    loc.t(R.string.cr_total_paid) to loc.money(cur, p.paid),
+                    (if (p.closing >= 0) loc.t(R.string.rp_amount_due) else loc.t(R.string.rp_advance_credit)) to loc.money(cur, Math.abs(p.closing))
+                )
+            )
+        )
+    }
+
+    fun customerWorkbook(
+        ctx: Context, loc: Loc, b: Business, c: Customer, range: DateRange, p: CustomerPeriod,
+        orders: List<SaleOrder>, payments: List<Payment>
+    ): File {
+        val inOrders = orders.filter { it.date in range.from..range.to }
+        val inPays = payments.filter { it.date in range.from..range.to }
+        val summary = listOf<List<Any?>>(
+            listOf(loc.t(R.string.rp_business), b.name), listOf(loc.t(R.string.rp_col_customer), c.name),
+            listOf(loc.t(R.string.rp_period), loc.rangeText(range)), listOf(),
+            listOf(loc.t(R.string.cr_brought_forward), p.broughtForward), listOf(loc.t(R.string.cr_total_billed), p.billed),
+            listOf(loc.t(R.string.cr_total_paid), p.paid), listOf(loc.t(R.string.rp_col_balance), p.closing)
+        )
+        val ledger = mutableListOf<List<Any?>>(listOf(loc.t(R.string.rp_col_date), loc.t(R.string.rp_col_details), loc.t(R.string.rp_col_debit), loc.t(R.string.rp_col_credit), loc.t(R.string.rp_col_balance)))
+        ledger += listOf<Any?>("-", loc.t(R.string.cr_brought_forward), null, null, p.broughtForward)
+        p.rows.forEach { ledger += listOf<Any?>(loc.dateTime(it.date), it.details, it.debit.takeIf { d -> d != 0.0 }, it.credit.takeIf { d -> d != 0.0 }, it.balance) }
+        val recs = mutableListOf<List<Any?>>(listOf(loc.t(R.string.rp_col_receipt), loc.t(R.string.rp_col_date), loc.t(R.string.rp_col_term), "Status", loc.t(R.string.rp_col_total), loc.t(R.string.rp_col_paid), loc.t(R.string.rp_col_due)))
+        inOrders.forEach { recs += listOf<Any?>(it.receiptNo, loc.dateTime(it.date), if (it.term == Term.CREDIT) loc.t(R.string.rc_credit) else loc.t(R.string.rc_cash), it.status, it.total, it.paid, Math.max(0.0, it.total - it.paid)) }
+        val pays = mutableListOf<List<Any?>>(listOf(loc.t(R.string.rp_col_date), loc.t(R.string.amount), loc.t(R.string.method), loc.t(R.string.note_optional)))
+        inPays.forEach { pays += listOf<Any?>(loc.dateTime(it.date), it.amount, loc.method(it.method), it.note) }
+        return Exporter.xlsx(
+            ctx, loc, "Customer_${c.name}_${stamp(range)}.xlsx",
+            listOf(
+                Exporter.Sheet(loc.t(R.string.rp_sheet_summary), summary), Exporter.Sheet(loc.t(R.string.cr_sheet_ledger), ledger),
+                Exporter.Sheet(loc.t(R.string.rp_sheet_receipts), recs), Exporter.Sheet(loc.t(R.string.rp_sheet_payments), pays)
             )
         )
     }

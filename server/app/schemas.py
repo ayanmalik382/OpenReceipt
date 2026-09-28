@@ -49,7 +49,7 @@ class ChangeIn(BaseModel):
     id: str = Field(min_length=1, max_length=64)
     updatedAt: int
     deleted: bool
-    data: str = Field(max_length=100_000)
+    data: str = Field(max_length=512_000)  # rows can carry a Base64 logo/photo
 
     @field_validator("entity")
     @classmethod

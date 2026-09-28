@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onSignIn: () -> Unit) {
+fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onSignIn: () -> Unit, onAppIcon: () -> Unit) {
     val loc = L.current
     val email by c.session.email.collectAsStateWithLifecycle()
     val list by remember { c.db.dao().observeBusinesses() }.collectAsStateWithLifecycle(emptyList())
@@ -44,6 +44,7 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
             IconButton(onClick = onLanguage) { Icon(Icons.Filled.Language, loc.t(R.string.language)) }
             IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, null) }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text(loc.t(R.string.app_icon)) }, onClick = { menu = false; onAppIcon() })
                 if (email == null) {
                     DropdownMenuItem(text = { Text(loc.t(R.string.sign_in_to_back_up)) }, onClick = { menu = false; onSignIn() })
                 } else {
@@ -83,7 +84,8 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
                 items(list, key = { it.id }) { b ->
                     ElevatedCard(Modifier.fillMaxWidth().clickable { onOpen(b.id) }) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Icon(Icons.Filled.Store, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
+                            if (b.logoBase64.isNotBlank()) Avatar(b.logoBase64, size = 44.dp)
+                            else Icon(Icons.Filled.Store, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
                             Column {
                                 Text(b.name, style = MaterialTheme.typography.titleMedium)
                                 if (b.address.isNotBlank()) Text(b.address, style = MaterialTheme.typography.bodySmall)
@@ -169,12 +171,17 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
     var footer by remember { mutableStateOf(ex?.footerNote ?: "") }
     var receiptLang by remember { mutableStateOf(ex?.receiptLang ?: "") }
     var templateId by remember { mutableStateOf(ex?.templateId ?: "classic") }
+    var logo by remember { mutableStateOf(ex?.logoBase64 ?: "") }
     var suppliers by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     AppScaffold(if (ex == null) loc.t(R.string.new_business) else loc.t(R.string.business_settings), onBack) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(16.dp).imePadding(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                ImagePicker(logo, { logo = it }, size = 88.dp, addLabel = loc.t(R.string.add_logo), changeLabel = loc.t(R.string.change_logo), removeLabel = loc.t(R.string.remove_logo))
+                Text(loc.t(R.string.logo_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(top = 4.dp))
+            }
             Field(name, { name = it }, loc.t(R.string.business_name_req))
             Field(address, { address = it }, loc.t(R.string.address))
             Field(phone, { phone = it }, loc.t(R.string.business_phone), keyboard = KeyboardType.Phone)
@@ -222,14 +229,14 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 if (error == null) scope.launch {
                     if (ex == null) {
                         val ownerKey = email ?: com.receiptbook.app.net.SessionStore.LOCAL_OWNER
-                        val id = c.repo.createBusiness(ownerKey, name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines(), templateId)
+                        val id = c.repo.createBusiness(ownerKey, name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines(), templateId, logoBase64 = logo)
                         onDone(id)
                     } else {
                         c.repo.save(
                             ex.copy(
                                 name = name.trim(), address = address.trim(), phone = phone.trim(), allowCash = cash, allowCredit = credit,
                                 currency = currency.trim().ifBlank { "Rs" }, receiptPrefix = prefix.trim().ifBlank { "R" },
-                                footerNote = footer.trim(), receiptLang = receiptLang
+                                footerNote = footer.trim(), receiptLang = receiptLang, logoBase64 = logo
                             )
                         )
                         onDone(null)

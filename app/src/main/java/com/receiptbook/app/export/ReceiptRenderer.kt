@@ -1,9 +1,11 @@
 package com.receiptbook.app.export
 
+import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.Layout
 import android.text.StaticLayout
@@ -12,6 +14,7 @@ import android.text.TextPaint
 import com.receiptbook.app.R
 import com.receiptbook.app.data.*
 import com.receiptbook.app.i18n.Loc
+import com.receiptbook.app.media.ImageStore
 
 /**
  * Draws a receipt in the business's chosen visual template (ReceiptStyle: colors, paper width,
@@ -54,22 +57,45 @@ object ReceiptRenderer {
         val END = Layout.Alignment.ALIGN_OPPOSITE    // "end"   = left in RTL, right in LTR
         val CENTER = Layout.Alignment.ALIGN_CENTER
 
-        var y = if (style.showBadge) 34f else 22f
+        // A real uploaded logo always shows (that's the point of uploading one); the template's
+        // "showBadge" toggle only controls the auto-generated first-letter circle as a fallback
+        // for businesses that haven't set a logo yet.
+        val logo = ImageStore.decode(b.logoBase64)
+        val showEmblem = logo != null || style.showBadge
+        var y = if (logo != null) 50f else if (showEmblem) 34f else 22f
         fun rule() {
             canvas?.drawLine(m, y, right, y, line)
             if (style.dividerStyle == ReceiptStyle.DOUBLE) canvas?.drawLine(m, y + 2.2f, right, y + 2.2f, line)
             y += if (style.dividerStyle == ReceiptStyle.DOUBLE) 12f else 10f
         }
         fun center(s: String, p: TextPaint, extra: Float = 4f) { y += draw(canvas, s, m, y, contentW, p, CENTER, rtl) + extra }
+        // Label/value boxes physically swap sides for RTL (label on the right, where RTL reading
+        // starts; value flush to the true left margin) - not just the text alignment inside a box
+        // that never moves, which is what made Urdu receipts look wrong before this fix.
         fun pair(l: String, v: String, strong: Boolean = false) {
             val p = if (strong) accentBold else normal
             val lw = contentW * 0.55f
-            val h1 = draw(canvas, l, m, y, lw, p, START, rtl)
-            val h2 = draw(canvas, v, m + lw, y, contentW - lw, p, END, rtl)
+            val vw = contentW - lw
+            val labelX = if (rtl) m + vw else m
+            val valueX = if (rtl) m else m + lw
+            val h1 = draw(canvas, l, labelX, y, lw, p, START, rtl)
+            val h2 = draw(canvas, v, valueX, y, vw, p, END, rtl)
             y += Math.max(h1, h2) + gap
         }
 
-        if (style.showBadge) {
+        if (logo != null) {
+            // Circular crop of the logo: scale so the shorter side fills the circle (center-crop).
+            val r = 20f
+            val cy = 22f
+            val scale = (r * 2) / minOf(logo.width, logo.height)
+            val logoShader = BitmapShader(logo, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
+                setLocalMatrix(android.graphics.Matrix().apply {
+                    postScale(scale, scale)
+                    postTranslate(width / 2 - logo.width * scale / 2, cy - logo.height * scale / 2)
+                })
+            }
+            canvas?.drawCircle(width / 2, cy, r, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.shader = logoShader })
+        } else if (style.showBadge) {
             val letter = b.name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
             val badge = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = accent }
             val badgeText = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; textAlign = Paint.Align.CENTER; textSize = 14f; typeface = Typeface.DEFAULT_BOLD }
@@ -92,15 +118,21 @@ object ReceiptRenderer {
         val nameW = contentW - numColW * 3
 
         // Item rows are laid out left-to-right as [name][qty][price][total]; for an RTL receipt
-        // language the whole row is mirrored to [total][price][qty][name] so it still reads start-to-end.
+        // language the whole row is mirrored to [total][price][qty][name] so the name column still
+        // sits at the true reading-start side (the right edge). The three numeric columns always
+        // stay right-aligned WITHIN their own cell, in both languages - that's the normal invoice
+        // convention (digits of different lengths still line up), not something that should flip
+        // with text direction the way the name column's alignment correctly does.
         fun header() {
             val labels = listOf(loc.t(R.string.rc_item) to nameW, loc.t(R.string.rc_qty) to numColW, loc.t(R.string.rc_price) to numColW, loc.t(R.string.rc_total) to numColW)
             var x = m
             val order = if (rtl) labels.reversed() else labels
             var maxH = 0f
             order.forEachIndexed { i, (text, w) ->
-                val align = if (!rtl) (if (i == 0) START else END) else (if (i == order.lastIndex) END else START)
-                maxH = Math.max(maxH, draw(canvas, text, x, y, w, bold, align, rtl))
+                val isNameCol = if (rtl) i == order.lastIndex else i == 0
+                val h = if (isNameCol) draw(canvas, text, x, y, w, bold, START, rtl)
+                else draw(canvas, text, x, y, w, bold, END, false)
+                maxH = Math.max(maxH, h)
                 x += w
             }
             y += maxH + 5f; rule()
@@ -110,8 +142,10 @@ object ReceiptRenderer {
             val order = if (rtl) cols.reversed() else cols
             var x = m; var maxH = 0f
             order.forEachIndexed { i, (text, w) ->
-                val align = if (!rtl) (if (i == 0) START else END) else (if (i == order.lastIndex) END else START)
-                maxH = Math.max(maxH, draw(canvas, text, x, y, w, normal, align, rtl))
+                val isNameCol = if (rtl) i == order.lastIndex else i == 0
+                val h = if (isNameCol) draw(canvas, text, x, y, w, normal, START, rtl)
+                else draw(canvas, text, x, y, w, normal, END, false)
+                maxH = Math.max(maxH, h)
                 x += w
             }
             y += maxH + lineGap

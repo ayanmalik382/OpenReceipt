@@ -137,3 +137,13 @@ async def test_delete_account_cascades(client):
 
     r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers=headers)
     assert r.status_code == 401  # token now refers to a deleted user
+
+
+async def test_sync_accepts_record_with_embedded_image(client):
+    token = await register_and_verify(client, "img@test.com")
+    headers = {"Authorization": f"Bearer {token}"}
+    big = rec("business", "bimg", 1, {"name": "Shop", "logoBase64": "A" * 200_000})  # ~200KB logo payload
+    r = await client.post("/sync", json={"cursor": 0, "changes": [big]}, headers=headers)
+    assert r.status_code == 200
+    r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers=headers)
+    assert len(r.json()["changes"]) == 1

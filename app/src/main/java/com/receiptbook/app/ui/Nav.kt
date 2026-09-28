@@ -47,9 +47,11 @@ fun AppNav(c: AppContainer) {
         // ---- businesses
         composable("businesses") {
             BusinessListScreen(c, onOpen = { nav.navigate("home/$it") }, onNew = { nav.navigate("business/new") },
-                onLanguage = { nav.navigate("language") }, onSignIn = { nav.navigate("login") })
+                onLanguage = { nav.navigate("language") }, onSignIn = { nav.navigate("login") },
+                onAppIcon = { nav.navigate("appicon") })
         }
         composable("language") { LanguageScreen(onBack = { nav.popBackStack() }) }
+        composable("appicon") { AppIconScreen(onBack = { nav.popBackStack() }) }
         composable("business/new") {
             BusinessFormScreen(c, null, onDone = { id -> if (id != null) nav.navigate("home/$id") { popUpTo("businesses") } else nav.popBackStack() },
                 onBack = { nav.popBackStack() }, onTemplate = {})
@@ -70,7 +72,8 @@ fun AppNav(c: AppContainer) {
         }
         composable("customer/{bid}/{cid}") { e ->
             val bid = s(e, "bid"); val cid = s(e, "cid")
-            CustomerDetailScreen(c, bid, cid, onBack = { nav.popBackStack() }, onNewOrder = { nav.navigate("neworder/$bid?cid=$cid") })
+            CustomerDetailScreen(c, bid, cid, onBack = { nav.popBackStack() }, onNewOrder = { nav.navigate("neworder/$bid?cid=$cid") },
+                onOpenOrder = { nav.navigate("order/$bid/$it") })
         }
         composable(
             "neworder/{bid}?cid={cid}",

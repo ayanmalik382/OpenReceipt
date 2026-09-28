@@ -19,7 +19,7 @@ pip install -r requirements-dev.txt
 cp .env.example .env        # set DATABASE_URL (from Neon) and JWT_SECRET (openssl rand -hex 32)
 export $(grep -v '^#' .env | xargs)
 uvicorn app.main:app --reload --port 8000
-pytest -q                   # 9 tests, run against an in-memory SQLite DB, not Neon
+pytest -q                   # 10 tests, run against an in-memory SQLite DB, not Neon
 ```
 Tables are created automatically on first boot against Neon, same as SQLite — nothing to migrate
 by hand. OTP codes print to the console until SMTP is configured. Full setup (creating the Neon
@@ -47,6 +47,11 @@ project, deploying with Docker, etc.) is in `server/README.md`.
 | Cancel | Receipts are never deleted; cancel keeps audit trail and restores stock |
 | Cash flow | Payments received, expenses/supplier payments, net cash flow, top products, top debtors |
 | Offline + optional sync | Everything works offline, permanently, with no account. Signing in backs the same data up and syncs it to other signed-in devices. |
+| Logo & photos | A business logo (home screen, every receipt, every PDF report) and optional customer/supplier photos. Any picture is auto-rotated, resized and compressed to ~100KB before it's stored. |
+| Unpaid-bills check | Customer screen lists exactly which bills still have money owing (later payments applied oldest-first); the New Receipt screen shows the count as soon as a customer is picked. |
+| Customer reports | Reports → "Reports by customer": pick any customer, see billed/paid/balance for the chosen date range (with balance brought forward), export as PDF or Excel. |
+| Export anywhere | Every export (receipt PDF/image, report PDFs, Excel) offers **Share** or **Save to device** (Downloads/ReceiptBook). |
+| App icon | Businesses ⋮ → "App icon": choose from 4 bundled designs. |
 | Languages | English and Urdu (app UI and, separately, receipt language), instant switch, full RTL support |
 
 ## 4. How money is calculated
@@ -122,4 +127,10 @@ the new language automatically. No other code changes are needed.
   (by design: local data belongs to the device first, the account is just a backup target).
 * Rate limiting on the Python backend is in-memory per process — fine for one instance; add a
   Redis-backed limiter if you ever run more than one API instance behind a load balancer.
-* Not yet: Bluetooth thermal printer, staff logins/roles, app PIN/biometric lock, tax, partial returns, uploading a real logo image, Play Store listing assets.
+* The logo appears on receipts (PDF/PNG) and all PDF reports, but **not inside Excel files** - embedding pictures in
+  the hand-written .xlsx writer is a sizeable job of its own; Excel exports carry the business name only.
+* Changing the app icon uses Android's activity-alias mechanism. The new icon shows immediately on most phones, but some
+  launchers cache icons or briefly restart the app when it changes.
+* Photos/logos are stored inside each synced record as Base64 (simple, fits the existing sync). That's fine for a few
+  hundred customers; if you ever expect thousands of photos, move them to object storage instead.
+* Not yet: Bluetooth thermal printer, staff logins/roles, app PIN/biometric lock, tax, partial returns, Play Store listing assets.

@@ -65,20 +65,15 @@ fun OrdersScreen(c: AppContainer, bid: String, onBack: () -> Unit, onOpen: (Stri
     val cur = biz?.currency ?: "Rs"
 
     AppScaffold(loc.t(R.string.receipts), onBack, actions = {
-        IconButton(onClick = {
-            val b = biz
-            if (b != null) scope.launch {
-                val f = withContext(Dispatchers.IO) { Reports.ordersPdf(ctx, loc, b, range, orders) }
-                Exporter.share(ctx, f, Exporter.PDF, loc.t(R.string.share_pdf_report))
+        val bz = biz
+        if (bz != null) {
+            ExportMenu(Exporter.PDF, loc.t(R.string.share_pdf_report), { withContext(Dispatchers.IO) { Reports.ordersPdf(ctx, loc, bz, range, orders) } }) { open ->
+                IconButton(onClick = open) { Icon(Icons.Filled.PictureAsPdf, loc.t(R.string.export_pdf)) }
             }
-        }) { Icon(Icons.Filled.PictureAsPdf, loc.t(R.string.export_pdf)) }
-        IconButton(onClick = {
-            val b = biz
-            if (b != null) scope.launch {
-                val f = withContext(Dispatchers.IO) { Reports.workbook(ctx, loc, b, range, orders, orderItems, payments, expenses, customers, suppliers, products) }
-                Exporter.share(ctx, f, Exporter.XLSX, loc.t(R.string.share_excel_file))
+            ExportMenu(Exporter.XLSX, loc.t(R.string.share_excel_file), { withContext(Dispatchers.IO) { Reports.workbook(ctx, loc, bz, range, orders, orderItems, payments, expenses, customers, suppliers, products) } }) { open ->
+                IconButton(onClick = open) { Icon(Icons.Filled.TableChart, loc.t(R.string.export_excel)) }
             }
-        }) { Icon(Icons.Filled.TableChart, loc.t(R.string.export_excel)) }
+        }
     }) { pad ->
         Column(Modifier.padding(pad)) {
             DateRangeBar(range) { vm.range.value = it }
@@ -147,18 +142,16 @@ fun OrderDetailScreen(c: AppContainer, bid: String, oid: String, onBack: () -> U
             val b = biz
             if (o != null && b != null) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(modifier = Modifier.weight(1f), onClick = {
-                        scope.launch {
-                            val f = withContext(Dispatchers.IO) { Exporter.receiptPdf(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) }
-                            Exporter.share(ctx, f, Exporter.PDF, loc.t(R.string.share_receipt_pdf))
+                    Box(Modifier.weight(1f)) {
+                        ExportMenu(Exporter.PDF, loc.t(R.string.share_receipt_pdf), { withContext(Dispatchers.IO) { Exporter.receiptPdf(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) } }) { open ->
+                            Button(modifier = Modifier.fillMaxWidth(), onClick = open) { Icon(Icons.Filled.PictureAsPdf, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.pdf)) }
                         }
-                    }) { Icon(Icons.Filled.PictureAsPdf, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.pdf)) }
-                    Button(modifier = Modifier.weight(1f), onClick = {
-                        scope.launch {
-                            val f = withContext(Dispatchers.IO) { Exporter.receiptPng(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) }
-                            Exporter.share(ctx, f, Exporter.PNG, loc.t(R.string.share_receipt_image))
+                    }
+                    Box(Modifier.weight(1f)) {
+                        ExportMenu(Exporter.PNG, loc.t(R.string.share_receipt_image), { withContext(Dispatchers.IO) { Exporter.receiptPng(ctx, rloc, ReceiptTemplates.styleFor(b), b, o, dao.items(o.id)) } }) { open ->
+                            Button(modifier = Modifier.fillMaxWidth(), onClick = open) { Icon(Icons.Filled.Image, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.image)) }
                         }
-                    }) { Icon(Icons.Filled.Image, null); Spacer(Modifier.width(6.dp)); Text(loc.t(R.string.image)) }
+                    }
                 }
                 if (o.status == Status.ACTIVE) OutlinedButton(onClick = { confirmCancel = true }, modifier = Modifier.fillMaxWidth()) {
                     Text(loc.t(R.string.cancel_this_receipt), color = Red)

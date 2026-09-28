@@ -1,9 +1,13 @@
 package com.receiptbook.app.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun CustomerDetailScreen(c: AppContainer, bid: String, cid: String, onBack: () -> Unit, onNewOrder: () -> Unit) {
+fun CustomerDetailScreen(c: AppContainer, bid: String, cid: String, onBack: () -> Unit, onNewOrder: () -> Unit, onOpenOrder: (String) -> Unit) {
     val loc = L.current
     val vm = vm { BizViewModel(c, bid) }
     val dao = c.db.dao()
@@ -51,9 +55,12 @@ fun CustomerDetailScreen(c: AppContainer, bid: String, cid: String, onBack: () -
     }) { pad ->
         if (cu == null || b == null) return@AppScaffold
         val ledger = remember(loc, cu, orders, payments) { Repository.ledger(loc, cu, orders, payments) }
+        val unpaid = remember(cu, orders, payments) { Repository.unpaidBills(cu, orders, payments) }
         Column(Modifier.padding(pad).padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
+                Row(Modifier.padding(16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                  Avatar(cu.photoBase64, size = 56.dp, placeholder = androidx.compose.material.icons.Icons.Filled.Person)
+                  Column {
                     Text(
                         when { bal > 0.004 -> loc.t(R.string.owes_you); bal < -0.004 -> loc.t(R.string.advance_credit); else -> loc.t(R.string.account_settled) },
                         style = MaterialTheme.typography.labelLarge
@@ -61,6 +68,33 @@ fun CustomerDetailScreen(c: AppContainer, bid: String, cid: String, onBack: () -
                     Text(loc.money(cur, Math.abs(bal)), style = MaterialTheme.typography.headlineMedium, color = if (bal > 0.004) Red else Green)
                     if (cu.phone.isNotBlank()) Text(cu.phone, style = MaterialTheme.typography.bodyMedium)
                     if (cu.address.isNotBlank()) Text(cu.address, style = MaterialTheme.typography.bodySmall)
+                  }
+                }
+            }
+            // ---- Unpaid-bills check: which bills still have money owing
+            ElevatedCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(loc.t(R.string.unpaid_bills), style = MaterialTheme.typography.titleSmall)
+                    if (unpaid.isEmpty) Text(loc.t(R.string.no_unpaid_bills), color = Green, style = MaterialTheme.typography.bodyMedium)
+                    if (unpaid.openingDue > 0.004) MoneyLine(loc.t(R.string.ledger_opening), loc.money(cur, unpaid.openingDue), color = Red)
+                    Column(Modifier.heightIn(max = 170.dp).verticalScroll(rememberScrollState())) {
+                    unpaid.bills.forEach { ub ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { onOpenOrder(ub.order.id) }.padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(ub.order.receiptNo, style = MaterialTheme.typography.bodyMedium)
+                                Text(loc.date(ub.order.date), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                            }
+                            Text(loc.money(cur, ub.due), color = Red, style = MaterialTheme.typography.titleSmall)
+                        }
+                    }
+                    }
+                    if (!unpaid.isEmpty) {
+                        HorizontalDivider()
+                        MoneyLine(loc.t(R.string.total_to_collect), loc.money(cur, unpaid.total), bold = true, color = Red)
+                    }
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -68,12 +102,11 @@ fun CustomerDetailScreen(c: AppContainer, bid: String, cid: String, onBack: () -
                 FilledTonalButton(onClick = { payDialog = true }, modifier = Modifier.weight(1f)) { Text(loc.t(R.string.receive_payment)) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(modifier = Modifier.weight(1f), onClick = {
-                    scope.launch {
-                        val f = withContext(Dispatchers.IO) { Reports.statementPdf(ctx, loc, b, cu, ledger, bal) }
-                        Exporter.share(ctx, f, Exporter.PDF, loc.t(R.string.share_statement))
+                Box(Modifier.weight(1f)) {
+                    ExportMenu(Exporter.PDF, loc.t(R.string.share_statement), { withContext(Dispatchers.IO) { Reports.statementPdf(ctx, loc, b, cu, ledger, bal) } }) { open ->
+                        OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = open) { Text(loc.t(R.string.statement_pdf)) }
                     }
-                }) { Text(loc.t(R.string.statement_pdf)) }
+                }
                 OutlinedButton(modifier = Modifier.weight(1f), enabled = bal > 0.004, onClick = {
                     Exporter.shareText(ctx, loc.t(R.string.reminder_message, cu.name, b.name, loc.money(cur, bal)), loc.t(R.string.send_reminder_title))
                 }) { Text(loc.t(R.string.send_reminder)) }

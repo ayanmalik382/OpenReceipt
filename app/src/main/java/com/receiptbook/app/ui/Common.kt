@@ -1,28 +1,44 @@
 package com.receiptbook.app.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.receiptbook.app.R
+import com.receiptbook.app.i18n.L
+import com.receiptbook.app.media.ImageStore
+import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.receiptbook.app.R
 import com.receiptbook.app.data.DateRange
 import com.receiptbook.app.data.Fmt
-import com.receiptbook.app.i18n.L
 import com.receiptbook.app.i18n.numFmt
 
 val Red = Color(0xFFB3261E)
@@ -189,5 +205,79 @@ fun DateRangeBar(range: DateRange, onChange: (DateRange) -> Unit) {
             },
             dismissButton = { TextButton(onClick = { step = 0 }) { Text(loc.t(R.string.cancel)) } }
         ) { DatePicker(st, title = { Text("  " + loc.t(R.string.range_end_date), Modifier.padding(16.dp)) }) }
+    }
+}
+
+/**
+ * A circular avatar (business logo / customer / supplier photo). Tap to pick a new photo from the
+ * gallery, or clear it if one is already set. The picked image is decoded, downsampled and
+ * JPEG-compressed by [ImageStore] off the main thread before [onChange] is called with the
+ * resulting Base64 string, so callers never have to worry about oversized images themselves.
+ */
+@Composable
+fun ImagePicker(
+    base64: String,
+    onChange: (String) -> Unit,
+    size: Dp = 72.dp,
+    placeholder: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.Store,
+    addLabel: String = L.t(R.string.add_photo),
+    changeLabel: String = L.t(R.string.change_photo),
+    removeLabel: String = L.t(R.string.remove_photo)
+) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val bitmap = remember(base64) { ImageStore.decode(base64) }
+
+    val pick = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        busy = true; error = null
+        scope.launch {
+            val result = ImageStore.compressToBase64(ctx, uri)
+            busy = false
+            if (result == null) error = L.t(R.string.image_failed) else onChange(result)
+        }
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer)
+                .clickable(enabled = !busy) { pick.launch("image/*") },
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                busy -> CircularProgressIndicator(Modifier.size(size / 3), strokeWidth = 2.dp)
+                bitmap != null -> Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                else -> Icon(placeholder, null, Modifier.size(size / 2.2f), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+            if (bitmap != null && !busy) {
+                IconButton(
+                    onClick = { onChange("") },
+                    modifier = Modifier.align(Alignment.TopEnd).size(22.dp)
+                        .background(MaterialTheme.colorScheme.error, CircleShape)
+                ) { Icon(Icons.Filled.Close, removeLabel, tint = MaterialTheme.colorScheme.onError, modifier = Modifier.size(14.dp)) }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        TextButton(onClick = { pick.launch("image/*") }, enabled = !busy) {
+            Icon(Icons.Filled.CameraAlt, null, Modifier.size(16.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(if (bitmap != null) changeLabel else addLabel, style = MaterialTheme.typography.labelMedium)
+        }
+        ErrorText(error)
+    }
+}
+
+/** Small circular thumbnail for list rows (business list, customer list) - decoded once per row. */
+@Composable
+fun Avatar(base64: String, size: Dp = 40.dp, placeholder: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.Store) {
+    val bitmap = remember(base64) { ImageStore.decode(base64) }
+    Box(
+        Modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center
+    ) {
+        if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        else Icon(placeholder, null, Modifier.size(size / 2f), tint = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }

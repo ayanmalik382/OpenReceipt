@@ -88,7 +88,7 @@ class SyncManager(
         try {
             var cursor = session.cursor
             val pending = tables.flatMap { t -> t.pending().map { t to it } }
-            val chunks: List<List<Pair<Table, Pending>>> = if (pending.isEmpty()) listOf(emptyList()) else pending.chunked(200)
+            val chunks: List<List<Pair<Table, Pending>>> = if (pending.isEmpty()) listOf(emptyList()) else pending.chunked(20)
 
             var resp: ApiClient.SyncResponse? = null
             for (chunk in chunks) {

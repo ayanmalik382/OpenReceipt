@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [Business::class, Supplier::class, Product::class, Customer::class,
         SaleOrder::class, OrderItem::class, Payment::class, Expense::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -19,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(ctx: Context): AppDatabase =
             Room.databaseBuilder(ctx.applicationContext, AppDatabase::class.java, "receiptbook.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
 
         /** v2: receipt language per business + receipt reference on payments (for translation). */
@@ -35,6 +35,16 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE businesses ADD COLUMN templateId TEXT NOT NULL DEFAULT 'classic'")
                 db.execSQL("ALTER TABLE businesses ADD COLUMN templateConfig TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
+        /** v4: an optional picture on a business (logo), customer, or supplier - a compressed
+         * Base64 JPEG (see media/ImageStore.kt). Empty means "no picture set". */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE businesses ADD COLUMN logoBase64 TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE customers ADD COLUMN photoBase64 TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE suppliers ADD COLUMN photoBase64 TEXT NOT NULL DEFAULT ''")
             }
         }
     }

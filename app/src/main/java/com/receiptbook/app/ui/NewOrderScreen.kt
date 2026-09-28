@@ -112,6 +112,11 @@ fun NewOrderScreen(c: AppContainer, bid: String, presetCustomerId: String?, onBa
         }
     }
     val prev = d.customer?.let { balances[it.id] } ?: 0.0
+    // Unpaid-bills check for the selected customer, shown right on the customer card.
+    val selId = d.customer?.id
+    val selOrders by remember(selId) { if (selId != null) c.db.dao().observeCustomerOrders(selId) else kotlinx.coroutines.flow.flowOf(emptyList()) }.collectAsStateWithLifecycle(emptyList())
+    val selPays by remember(selId) { if (selId != null) c.db.dao().observeCustomerPayments(selId) else kotlinx.coroutines.flow.flowOf(emptyList()) }.collectAsStateWithLifecycle(emptyList())
+    val unpaidCount = d.customer?.let { Repository.unpaidBills(it, selOrders, selPays).bills.size } ?: 0
     val extra = Fmt.round2((d.receivedNum - d.total).coerceAtLeast(0.0))
     val newBalance = Fmt.round2(prev + d.total - minOf(d.receivedNum, d.total) - extra)
 
@@ -128,6 +133,7 @@ fun NewOrderScreen(c: AppContainer, bid: String, presetCustomerId: String?, onBa
                                 if (prev > 0.004) Text(loc.t(R.string.previous_arrears, loc.money(cur, prev)), color = Red, style = MaterialTheme.typography.bodyMedium)
                                 else if (prev < -0.004) Text(loc.t(R.string.advance_credit_amount, loc.money(cur, -prev)), color = Green)
                                 else Text(loc.t(R.string.no_arrears), color = Green)
+                                if (unpaidCount > 0) Text(loc.t(R.string.unpaid_bills_count, unpaidCount), color = Red, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                         Text(loc.t(R.string.change), color = MaterialTheme.colorScheme.primary)

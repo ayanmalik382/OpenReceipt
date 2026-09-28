@@ -17,6 +17,14 @@ data class CartLine(
     val trackStock: Boolean = false
 )
 
+/** A bill that still has money owing on it, after later payments are applied oldest-first. */
+data class UnpaidBill(val order: SaleOrder, val due: Double)
+
+data class UnpaidSummary(val openingDue: Double, val bills: List<UnpaidBill>) {
+    val total: Double get() = openingDue + bills.sumOf { it.due }
+    val isEmpty: Boolean get() = openingDue <= 0.004 && bills.isEmpty()
+}
+
 data class LedgerRow(val date: Long, val details: String, val debit: Double, val credit: Double, val balance: Double)
 
 data class CashSummary(
@@ -40,7 +48,7 @@ class Repository(private val db: AppDatabase) {
         email: String, name: String, address: String, phone: String,
         cash: Boolean, credit: Boolean, currency: String, prefix: String, footer: String,
         receiptLang: String, supplierNames: List<String>,
-        templateId: String = "classic", templateConfig: String = ""
+        templateId: String = "classic", templateConfig: String = "", logoBase64: String = ""
     ): String {
         val id = newId()
         val t = now()
@@ -50,7 +58,7 @@ class Repository(private val db: AppDatabase) {
                     id = id, ownerEmail = email, name = name.trim(), address = address.trim(), phone = phone.trim(),
                     allowCash = cash, allowCredit = credit, currency = currency.trim().ifBlank { "Rs" },
                     receiptPrefix = prefix.trim().ifBlank { "R" }, nextReceiptNo = 1, footerNote = footer.trim(),
-                    receiptLang = receiptLang, templateId = templateId, templateConfig = templateConfig,
+                    receiptLang = receiptLang, templateId = templateId, templateConfig = templateConfig, logoBase64 = logoBase64,
                     updatedAt = t, deleted = false, dirty = true
                 )
             )
@@ -190,6 +198,28 @@ class Repository(private val db: AppDatabase) {
                 out += LedgerRow(e.date, e.details, e.debit, e.credit, bal)
             }
             return out
+        }
+
+        /**
+         * Which bills are still unpaid? Payments received later (arrears payments) aren't tied to a
+         * specific bill, so they're applied oldest-first: first to any opening balance the customer
+         * had before using the app, then to the oldest bill, and so on. What's left is what is
+         * genuinely still owed, bill by bill.
+         */
+        fun unpaidBills(c: Customer, orders: List<SaleOrder>, payments: List<Payment>): UnpaidSummary {
+            var credit = payments.sumOf { it.amount }
+            var openingDue = maxOf(c.openingBalance, 0.0)
+            val useOnOpening = minOf(credit, openingDue)
+            openingDue -= useOnOpening; credit -= useOnOpening
+            val bills = mutableListOf<UnpaidBill>()
+            for (o in orders.filter { it.status == Status.ACTIVE }.sortedBy { it.date }) {
+                var due = Fmt.round2(o.total - o.paid)
+                if (due <= 0.004) continue
+                val use = minOf(credit, due)
+                due = Fmt.round2(due - use); credit -= use
+                if (due > 0.004) bills += UnpaidBill(o, due)
+            }
+            return UnpaidSummary(Fmt.round2(openingDue), bills)
         }
 
         fun summarize(orders: List<SaleOrder>, payments: List<Payment>, expenses: List<Expense>): CashSummary {

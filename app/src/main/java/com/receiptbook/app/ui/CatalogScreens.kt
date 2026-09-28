@@ -9,7 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -50,13 +52,10 @@ fun ProductsScreen(c: AppContainer, bid: String, onBack: () -> Unit) {
     AppScaffold(
         loc.t(R.string.products_and_stock), onBack, snackbar = snack,
         actions = {
-            IconButton(onClick = {
-                val b = biz
-                if (b != null) scope.launch {
-                    val f = withContext(Dispatchers.IO) { Reports.stockPdf(ctx, loc, b, products) }
-                    Exporter.share(ctx, f, Exporter.PDF, loc.t(R.string.export_stock_list))
-                }
-            }) { Icon(Icons.Filled.PictureAsPdf, loc.t(R.string.export_stock_list)) }
+            val b = biz
+            if (b != null) ExportMenu(Exporter.PDF, loc.t(R.string.export_stock_list), { withContext(Dispatchers.IO) { Reports.stockPdf(ctx, loc, b, products) } }) { open ->
+                IconButton(onClick = open) { Icon(Icons.Filled.PictureAsPdf, loc.t(R.string.export_stock_list)) }
+            }
         },
         fab = { FloatingActionButton(onClick = { editing = null; showForm = true }) { Icon(Icons.Filled.Add, loc.t(R.string.add_product)) } }
     ) { pad ->
@@ -182,6 +181,7 @@ fun SuppliersScreen(c: AppContainer, bid: String, onBack: () -> Unit) {
             items(suppliers, key = { it.id }) { s ->
                 ListItem(
                     modifier = Modifier.clickable { editing = s; showForm = true },
+                    leadingContent = { Avatar(s.photoBase64, size = 40.dp, placeholder = androidx.compose.material.icons.Icons.Filled.LocalShipping) },
                     headlineContent = { Text(s.name) },
                     supportingContent = { Text(listOf(s.phone, s.address).filter { it.isNotBlank() }.joinToString("  •  ")) }
                 )
@@ -195,11 +195,15 @@ fun SuppliersScreen(c: AppContainer, bid: String, onBack: () -> Unit) {
         var name by remember(init) { mutableStateOf(init?.name ?: "") }
         var phone by remember(init) { mutableStateOf(init?.phone ?: "") }
         var address by remember(init) { mutableStateOf(init?.address ?: "") }
+        var photo by remember(init) { mutableStateOf(init?.photoBase64 ?: "") }
         AlertDialog(
             onDismissRequest = { showForm = false },
             title = { Text(if (init == null) loc.t(R.string.add_supplier) else loc.t(R.string.edit_supplier)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        ImagePicker(photo, { photo = it }, size = 72.dp, placeholder = androidx.compose.material.icons.Icons.Filled.LocalShipping)
+                    }
                     Field(name, { name = it }, loc.t(R.string.supplier_name_req))
                     Field(phone, { phone = it }, loc.t(R.string.phone), keyboard = KeyboardType.Phone)
                     Field(address, { address = it }, loc.t(R.string.address))
@@ -208,7 +212,7 @@ fun SuppliersScreen(c: AppContainer, bid: String, onBack: () -> Unit) {
             confirmButton = {
                 TextButton(enabled = name.isNotBlank(), onClick = {
                     scope.launch {
-                        c.repo.save((init ?: Supplier(UUID.randomUUID().toString(), bid, name)).copy(name = name.trim(), phone = phone.trim(), address = address.trim()))
+                        c.repo.save((init ?: Supplier(UUID.randomUUID().toString(), bid, name)).copy(name = name.trim(), phone = phone.trim(), address = address.trim(), photoBase64 = photo))
                         showForm = false
                     }
                 }) { Text(loc.t(R.string.save)) }
@@ -235,12 +239,16 @@ fun CustomerDialog(bid: String, initial: Customer?, onSave: (Customer) -> Unit, 
     var phone by remember { mutableStateOf(initial?.phone ?: "") }
     var address by remember { mutableStateOf(initial?.address ?: "") }
     var opening by remember { mutableStateOf(initial?.openingBalance?.takeIf { it != 0.0 }?.let { loc.numFmt(it) } ?: "") }
+    var photo by remember { mutableStateOf(initial?.photoBase64 ?: "") }
     var err by remember { mutableStateOf<String?>(null) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (initial == null) loc.t(R.string.add_customer) else loc.t(R.string.edit_customer)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    ImagePicker(photo, { photo = it }, size = 72.dp, placeholder = androidx.compose.material.icons.Icons.Filled.Person)
+                }
                 Field(name, { name = it }, loc.t(R.string.customer_name_req))
                 Field(phone, { phone = it }, loc.t(R.string.phone), keyboard = KeyboardType.Phone)
                 Field(address, { address = it }, loc.t(R.string.address))
@@ -254,7 +262,7 @@ fun CustomerDialog(bid: String, initial: Customer?, onSave: (Customer) -> Unit, 
                 when {
                     name.isBlank() -> err = loc.t(R.string.err_enter_customer_name)
                     ob == null -> err = loc.t(R.string.err_valid_amount)
-                    else -> onSave((initial ?: Customer(UUID.randomUUID().toString(), bid, name)).copy(name = name.trim(), phone = phone.trim(), address = address.trim(), openingBalance = ob))
+                    else -> onSave((initial ?: Customer(UUID.randomUUID().toString(), bid, name)).copy(name = name.trim(), phone = phone.trim(), address = address.trim(), openingBalance = ob, photoBase64 = photo))
                 }
             }) { Text(loc.t(R.string.save)) }
         },
@@ -298,6 +306,7 @@ fun CustomersScreen(c: AppContainer, bid: String, onBack: () -> Unit, onOpen: (S
                     val bal = balances[cu.id] ?: 0.0
                     ListItem(
                         modifier = Modifier.clickable { onOpen(cu.id) },
+                        leadingContent = { Avatar(cu.photoBase64, size = 40.dp, placeholder = androidx.compose.material.icons.Icons.Filled.Person) },
                         headlineContent = { Text(cu.name) },
                         supportingContent = { if (cu.phone.isNotBlank()) Text(cu.phone) },
                         trailingContent = {

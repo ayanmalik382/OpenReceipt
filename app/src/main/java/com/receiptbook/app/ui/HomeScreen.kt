@@ -1,5 +1,6 @@
 package com.receiptbook.app.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,9 +40,22 @@ fun HomeScreen(
 
     AppScaffold(biz?.name ?: "", onBack) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { go("neworder/$bid") }, modifier = Modifier.fillMaxWidth().height(60.dp)) {
-                Icon(Icons.Filled.Receipt, null); Spacer(Modifier.width(8.dp)); Text(loc.t(R.string.new_receipt_order), style = MaterialTheme.typography.titleMedium)
+            // ---- Business identity header (logo shown here, and reused on every receipt/export)
+            biz?.let { b ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    if (b.logoBase64.isNotBlank()) Avatar(b.logoBase64, size = 56.dp)
+                    else Box(
+                        Modifier.size(56.dp).background(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium),
+                        contentAlignment = Alignment.Center
+                    ) { Icon(Icons.Filled.Store, null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(30.dp)) }
+                    Column {
+                        Text(b.name, style = MaterialTheme.typography.titleLarge)
+                        if (b.address.isNotBlank()) Text(b.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                    }
+                }
             }
+
+            // ---- The 4 at-a-glance numbers, right under the business header
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Stat(loc.t(R.string.todays_sales), loc.money(cur, today.sales), loc.t(R.string.receipts_count, orders.count { it.status == Status.ACTIVE }), Modifier.weight(1f))
                 Stat(loc.t(R.string.cash_in_today), loc.money(cur, today.cashIn), loc.t(R.string.out_amount, loc.numFmt(today.expenses)), Modifier.weight(1f))
@@ -50,6 +64,12 @@ fun HomeScreen(
                 Stat(loc.t(R.string.customers_owe_you), loc.money(cur, receivable), loc.t(R.string.customers_count, balances.values.count { it > 0.004 }), Modifier.weight(1f), if (receivable > 0) Red else Green)
                 Stat(loc.t(R.string.low_stock), "$low", loc.t(R.string.products_to_refill), Modifier.weight(1f), if (low > 0) Red else Green)
             }
+
+            // ---- New receipt/order sits right below those 4 numbers
+            Button(onClick = { go("neworder/$bid") }, modifier = Modifier.fillMaxWidth().height(60.dp)) {
+                Icon(Icons.Filled.Receipt, null); Spacer(Modifier.width(8.dp)); Text(loc.t(R.string.new_receipt_order), style = MaterialTheme.typography.titleMedium)
+            }
+
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Tile(Icons.Filled.ReceiptLong, loc.t(R.string.tile_receipts), Modifier.weight(1f)) { go("orders/$bid") }
                 Tile(Icons.Filled.People, loc.t(R.string.tile_customers), Modifier.weight(1f)) { go("customers/$bid") }
@@ -63,32 +83,14 @@ fun HomeScreen(
                 Tile(Icons.Filled.Assessment, loc.t(R.string.tile_reports), Modifier.weight(1f)) { go("reports/$bid") }
             }
             Tile(Icons.Filled.Settings, loc.t(R.string.business_settings), Modifier.fillMaxWidth()) { go("business/edit/$bid") }
+
             Spacer(Modifier.height(24.dp))
-
             HorizontalDivider()
-
             Spacer(Modifier.height(12.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "ReceiptBook",
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                Text(
-                    "Developed by Conscitool",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-
-                Text(
-                    "Contact: +92 339 8000402",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("ReceiptBook", style = MaterialTheme.typography.titleSmall)
+                Text("Developed by Conscitool", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text("Contact: +92 339 8000402", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
             }
         }
     }

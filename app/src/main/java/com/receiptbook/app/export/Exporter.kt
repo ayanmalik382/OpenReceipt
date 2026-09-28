@@ -95,7 +95,7 @@ object Exporter {
             .setIncludePad(false).build()
     }
 
-    fun tablePdf(ctx: Context, loc: Loc, fileName: String, spec: TableSpec): File {
+    fun tablePdf(ctx: Context, loc: Loc, fileName: String, spec: TableSpec, logo: Bitmap? = null): File {
         val doc = PdfDocument()
         val pg = Pager(doc)
         val left = 32f
@@ -131,12 +131,28 @@ object Exporter {
         fun newPage(first: Boolean, withHeader: Boolean = true) {
             pg.next()
             if (first) {
-                val titleSl = cellLayout(spec.title, (right - left).toInt(), h1, START, loc.rtl)
-                pg.canvas.save(); pg.canvas.translate(left, pg.y); titleSl.draw(pg.canvas); pg.canvas.restore()
+                // Business logo sits at the reading-END side of the header (right for LTR, left for RTL),
+                // with the title taking the rest of the row.
+                val logoSize = 44f
+                val titleW = if (logo != null) (right - left - logoSize - 10f) else (right - left)
+                if (logo != null) {
+                    val lx = if (loc.rtl) left else right - logoSize
+                    val dst = android.graphics.RectF(lx, pg.y, lx + logoSize, pg.y + logoSize)
+                    val square = minOf(logo.width, logo.height)
+                    val src = android.graphics.Rect((logo.width - square) / 2, (logo.height - square) / 2, (logo.width + square) / 2, (logo.height + square) / 2)
+                    pg.canvas.save()
+                    val clip = android.graphics.Path().apply { addRoundRect(dst, 8f, 8f, android.graphics.Path.Direction.CW) }
+                    pg.canvas.clipPath(clip)
+                    pg.canvas.drawBitmap(logo, src, dst, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+                    pg.canvas.restore()
+                }
+                val titleX = if (logo != null && loc.rtl) left + logoSize + 10f else left
+                val titleSl = cellLayout(spec.title, titleW.toInt(), h1, START, loc.rtl)
+                pg.canvas.save(); pg.canvas.translate(titleX, pg.y); titleSl.draw(pg.canvas); pg.canvas.restore()
                 pg.y += titleSl.height + 8f
-                val subSl = cellLayout(spec.subtitle, (right - left).toInt(), normal, START, loc.rtl)
-                pg.canvas.save(); pg.canvas.translate(left, pg.y); subSl.draw(pg.canvas); pg.canvas.restore()
-                pg.y += subSl.height + 14f
+                val subSl = cellLayout(spec.subtitle, titleW.toInt(), normal, START, loc.rtl)
+                pg.canvas.save(); pg.canvas.translate(titleX, pg.y); subSl.draw(pg.canvas); pg.canvas.restore()
+                pg.y += Math.max(subSl.height + 14f, if (logo != null) logoSize - titleSl.height - 8f + 10f else 0f)
             }
             if (withHeader) {
                 val hh = header()
@@ -197,6 +213,38 @@ object Exporter {
         val chooser = Intent.createChooser(send, chooserTitle)
         if (ctx !is android.app.Activity) chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         ctx.startActivity(chooser)
+    }
+
+    /**
+     * Copies an exported file into the phone's public Downloads folder (in a "ReceiptBook" subfolder)
+     * so it can be found in any file manager. Android 10+ uses MediaStore (no permission needed);
+     * older versions write directly and need the storage permission (see ui/ExportUi.kt).
+     */
+    suspend fun saveToDownloads(ctx: Context, file: File, mime: String): Boolean = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                val values = android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, file.name)
+                    put(android.provider.MediaStore.MediaColumns.MIME_TYPE, mime)
+                    put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/ReceiptBook")
+                    put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1)
+                }
+                val resolver = ctx.contentResolver
+                val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return@withContext false
+                val written = resolver.openOutputStream(uri)?.use { out -> file.inputStream().use { it.copyTo(out) }; true } ?: false
+                if (!written) { resolver.delete(uri, null, null); return@withContext false }
+                values.clear(); values.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0)
+                resolver.update(uri, values, null, null)
+                true
+            } else {
+                val dir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "ReceiptBook")
+                dir.mkdirs()
+                file.copyTo(File(dir, file.name), overwrite = true)
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun shareText(ctx: Context, text: String, chooserTitle: String) {

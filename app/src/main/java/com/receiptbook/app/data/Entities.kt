@@ -38,6 +38,8 @@ data class Business(
     @ColumnInfo(defaultValue = "'classic'") val templateId: String = "classic",
     /** JSON ReceiptStyle, used only when templateId == "custom". */
     @ColumnInfo(defaultValue = "''") val templateConfig: String = "",
+    /** Compressed Base64 JPEG logo, shown on the home screen and every receipt/report. Empty = none. */
+    @ColumnInfo(defaultValue = "''") val logoBase64: String = "",
     override val updatedAt: Long = 0,
     override val deleted: Boolean = false,
     override val dirty: Boolean = true
@@ -51,6 +53,8 @@ data class Supplier(
     val name: String,
     val phone: String = "",
     val address: String = "",
+    /** Compressed Base64 JPEG photo. Empty = none. */
+    @ColumnInfo(defaultValue = "''") val photoBase64: String = "",
     override val updatedAt: Long = 0,
     override val deleted: Boolean = false,
     override val dirty: Boolean = true
@@ -84,6 +88,8 @@ data class Customer(
     val address: String = "",
     /** Arrears the customer already owed before using the app. */
     val openingBalance: Double = 0.0,
+    /** Compressed Base64 JPEG photo. Empty = none. */
+    @ColumnInfo(defaultValue = "''") val photoBase64: String = "",
     override val updatedAt: Long = 0,
     override val deleted: Boolean = false,
     override val dirty: Boolean = true
