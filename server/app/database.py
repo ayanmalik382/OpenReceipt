@@ -21,7 +21,14 @@ def _make_engine():
         )
     # Neon (and most managed Postgres) require TLS; asyncpg wants it as a connect arg,
     # not a "?sslmode=require" query string.
-    return create_async_engine(url, connect_args={"ssl": True}, pool_pre_ping=True)
+    # Neon's "-pooler" hostnames go through PgBouncer, which doesn't reliably support asyncpg's
+    # prepared-statement cache - turning the cache off avoids "prepared statement ... does not
+    # exist" errors. (Harmless on a direct, non-pooled connection.)
+    return create_async_engine(
+        url,
+        connect_args={"ssl": True, "statement_cache_size": 0, "prepared_statement_cache_size": 0},
+        pool_pre_ping=True,
+    )
 
 
 engine = _make_engine()

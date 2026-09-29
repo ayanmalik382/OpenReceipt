@@ -23,8 +23,6 @@ class User(Base):
 
 
 class Record(Base):
-    """One row per synced entity (business/product/customer/order/...). Composite primary
-    key mirrors the SQLite version: a device can never accidentally create a duplicate."""
     __tablename__ = "records"
 
     user_id: Mapped[int] = mapped_column(
