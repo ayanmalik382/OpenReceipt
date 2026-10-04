@@ -469,4 +469,81 @@
     <string name="cr_sheet_ledger">Account</string>
     <string name="cr_receipts_in_period">%1$d receipts in this period</string>
     <string name="cr_balance_now">Balance at end of period</string>
+    <string name="recently_deleted">Recently deleted</string>
+    <string name="recently_deleted_businesses">Recently deleted businesses</string>
+    <string name="restore">Restore</string>
+    <string name="delete_permanently">Delete permanently</string>
+    <string name="delete_permanently_title">Delete permanently?</string>
+    <string name="delete_permanently_body">This removes it from this phone, and from the cloud if you're signed in. It cannot be undone.</string>
+    <string name="nothing_in_trash">Nothing here.</string>
+    <string name="restored">Restored</string>
+    <string name="deleted_forever">Deleted permanently</string>
+    <string name="restoring_your_data">Restoring your data…</string>
+    <string name="restoring_your_data_hint">This can take a moment the first time you sign in on a new phone.</string>
+    <string name="deleted_on">Deleted %1$s</string>
+    <string name="trash_hint">Deleted items stay here until you restore them or delete them permanently - nothing is removed for good by mistake.</string>
+    <string name="delete_business_forever_note">Its products, customers, suppliers and other records are not deleted - they stay in your account, hidden, unless you restore this business.</string>
+    <!-- Field of business -->
+    <string name="field_food">Food</string>
+    <string name="field_engineering">Engineering</string>
+    <string name="field_manufacturing">Manufacturing</string>
+    <string name="field_it">IT</string>
+    <string name="field_retail">Retail</string>
+    <string name="field_construction">Construction</string>
+    <string name="field_textile">Textile</string>
+    <string name="field_agriculture">Agriculture</string>
+    <string name="field_healthcare">Healthcare</string>
+    <string name="field_education">Education</string>
+    <string name="field_automotive">Automotive</string>
+    <string name="field_electronics">Electronics</string>
+    <string name="field_furniture">Furniture</string>
+    <string name="field_hardware">Hardware</string>
+    <string name="field_pharmaceuticals">Pharmaceuticals</string>
+    <string name="field_transport">Transport / Logistics</string>
+    <string name="field_real_estate">Real Estate</string>
+    <string name="field_other">Other</string>
+
+    <!-- Nature of business -->
+    <string name="nature_manufacturing">Manufacturing</string>
+    <string name="nature_retail">Retail</string>
+    <string name="nature_marketing_booking">Marketing / Booking</string>
+    <string name="nature_distribution">Distribution</string>
+
+    <!-- Business registration details -->
+    <string name="business_details">Business details</string>
+    <string name="ntn_optional">NTN (optional)</string>
+    <string name="city">City</string>
+    <string name="field_of_business">Field of business</string>
+    <string name="nature_of_business">Nature of business</string>
+    <string name="other_field_hint">Describe your field of business</string>
+    <string name="err_enter_city">Enter the city</string>
+    <string name="err_choose_field">Choose the field of business</string>
+    <string name="err_choose_field_other">Describe your field of business</string>
+    <string name="err_choose_nature">Choose the nature of business</string>
+
+    <!-- Contacts -->
+    <string name="import_from_contacts">Import from contacts</string>
+    <string name="contacts_permission_needed">ReceiptBook needs permission to read your contacts to import a name and phone number.</string>
+    <string name="contacts_permission_denied">Permission denied - you can still enter the details by hand.</string>
+
+    <!-- Business directory -->
+    <string name="find_other_businesses">Find other businesses</string>
+    <string name="directory_title">Business directory</string>
+    <string name="search_businesses">Search by name or city</string>
+    <string name="filter_field">Field</string>
+    <string name="filter_nature">Nature</string>
+    <string name="filter_all">All</string>
+    <string name="verified_business">Verified</string>
+    <string name="verified_business_hint">Published by a signed-in ReceiptBook account</string>
+    <string name="no_directory_results">No businesses found. Try a different search or filter.</string>
+    <string name="load_more">Load more</string>
+    <string name="directory_listing">Directory listing</string>
+    <string name="list_my_business">List my business in the directory</string>
+    <string name="list_my_business_hint">Let other shop owners find this business by field, nature or city. You can turn this off at any time. Requires signing in.</string>
+    <string name="list_my_business_needs_login">Sign in to list your business in the directory.</string>
+    <string name="published_to_directory">Listed in the directory</string>
+    <string name="unpublished_from_directory">Removed from the directory</string>
+    <string name="publish_failed">Could not update your directory listing. Check your connection and try again.</string>
+    <string name="directory_preview">This is how your business will appear to others:</string>
+    <string name="choose">Choose</string>
 </resources>

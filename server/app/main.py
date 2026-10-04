@@ -12,7 +12,7 @@ from .config import get_settings
 from .database import init_models
 from .deps import limiter
 from .mailer import send_otp  # noqa: F401  (imported so mailer config errors surface at import time)
-from .routers import auth, sync
+from .routers import auth, directory, sync
 
 log = logging.getLogger("receiptbook")
 settings = get_settings()
@@ -62,3 +62,4 @@ async def health():
 
 app.include_router(auth.router)
 app.include_router(sync.router)
+app.include_router(directory.router)

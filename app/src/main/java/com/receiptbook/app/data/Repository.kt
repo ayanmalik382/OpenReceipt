@@ -6,6 +6,7 @@ import com.receiptbook.app.i18n.L
 import com.receiptbook.app.i18n.Loc
 import com.receiptbook.app.i18n.need
 import com.receiptbook.app.i18n.numFmt
+import com.receiptbook.app.net.SessionStore
 import java.util.UUID
 
 data class CartLine(
@@ -38,7 +39,7 @@ data class CashSummary(
     val net: Double get() = cashIn - expenses
 }
 
-class Repository(private val db: AppDatabase) {
+class Repository(private val db: AppDatabase, private val session: SessionStore) {
     private val dao = db.dao()
     private fun now() = System.currentTimeMillis()
     fun newId(): String = UUID.randomUUID().toString()
@@ -48,7 +49,8 @@ class Repository(private val db: AppDatabase) {
         email: String, name: String, address: String, phone: String,
         cash: Boolean, credit: Boolean, currency: String, prefix: String, footer: String,
         receiptLang: String, supplierNames: List<String>,
-        templateId: String = "classic", templateConfig: String = "", logoBase64: String = ""
+        templateId: String = "classic", templateConfig: String = "", logoBase64: String = "",
+        ntn: String = "", city: String = "", fieldOfBusiness: String = "", fieldOfBusinessOther: String = "", natureOfBusiness: String = ""
     ): String {
         val id = newId()
         val t = now()
@@ -59,6 +61,9 @@ class Repository(private val db: AppDatabase) {
                     allowCash = cash, allowCredit = credit, currency = currency.trim().ifBlank { "Rs" },
                     receiptPrefix = prefix.trim().ifBlank { "R" }, nextReceiptNo = 1, footerNote = footer.trim(),
                     receiptLang = receiptLang, templateId = templateId, templateConfig = templateConfig, logoBase64 = logoBase64,
+                    ntn = ntn.trim(), city = city.trim(), fieldOfBusiness = fieldOfBusiness,
+                    fieldOfBusinessOther = if (fieldOfBusiness == BusinessFields.OTHER) fieldOfBusinessOther.trim() else "",
+                    natureOfBusiness = natureOfBusiness,
                     updatedAt = t, deleted = false, dirty = true
                 )
             )
@@ -71,12 +76,15 @@ class Repository(private val db: AppDatabase) {
 
     suspend fun save(b: Business) = dao.upsertBusiness(b.copy(updatedAt = now(), dirty = true))
     suspend fun remove(b: Business) = dao.upsertBusiness(b.copy(deleted = true, updatedAt = now(), dirty = true))
+    suspend fun restore(b: Business) = dao.upsertBusiness(b.copy(deleted = false, updatedAt = now(), dirty = true))
 
     // ---------- Simple CRUD ----------
     suspend fun save(s: Supplier) = dao.upsertSupplier(s.copy(updatedAt = now(), dirty = true))
     suspend fun remove(s: Supplier) = dao.upsertSupplier(s.copy(deleted = true, updatedAt = now(), dirty = true))
+    suspend fun restore(s: Supplier) = dao.upsertSupplier(s.copy(deleted = false, updatedAt = now(), dirty = true))
     suspend fun save(p: Product) = dao.upsertProduct(p.copy(updatedAt = now(), dirty = true))
     suspend fun remove(p: Product) = dao.upsertProduct(p.copy(deleted = true, updatedAt = now(), dirty = true))
+    suspend fun restore(p: Product) = dao.upsertProduct(p.copy(deleted = false, updatedAt = now(), dirty = true))
     suspend fun save(c: Customer) = dao.upsertCustomer(c.copy(updatedAt = now(), dirty = true))
 
     /** Returns a (translated) error message if the customer can't be removed. */
@@ -86,6 +94,7 @@ class Repository(private val db: AppDatabase) {
         dao.upsertCustomer(c.copy(deleted = true, updatedAt = now(), dirty = true))
         return null
     }
+    suspend fun restore(c: Customer) = dao.upsertCustomer(c.copy(deleted = false, updatedAt = now(), dirty = true))
 
     // ---------- Orders ----------
     suspend fun createOrder(
@@ -168,12 +177,32 @@ class Repository(private val db: AppDatabase) {
         )
     }
     suspend fun remove(p: Payment) = dao.upsertPayment(p.copy(deleted = true, updatedAt = now(), dirty = true))
+    suspend fun restore(p: Payment) = dao.upsertPayment(p.copy(deleted = false, updatedAt = now(), dirty = true))
 
     suspend fun addExpense(bid: String, supplierId: String?, category: String, amount: Double, note: String, date: Long = now()) {
         need(amount > 0, R.string.err_amount)
         dao.upsertExpense(Expense(newId(), bid, supplierId, category, date, Fmt.round2(amount), note.trim(), now(), false, true))
     }
     suspend fun remove(e: Expense) = dao.upsertExpense(e.copy(deleted = true, updatedAt = now(), dirty = true))
+    suspend fun restore(e: Expense) = dao.upsertExpense(e.copy(deleted = false, updatedAt = now(), dirty = true))
+
+    // ---------- Permanent deletion ("Recently deleted" -> "Delete permanently") ----------
+    // Only reachable on an item that is ALREADY soft-deleted (deleted = true), so it has already
+    // been hidden and (if signed in) already synced as deleted to the cloud. This removes it from
+    // this phone right away, and queues the matching row for removal from the cloud too - see
+    // SyncManager.flushPurges(), which retries this automatically once the app is back online.
+    suspend fun purge(entity: String, id: String) {
+        when (entity) {
+            "business" -> dao.hardDeleteBusiness(id)
+            "supplier" -> dao.hardDeleteSupplier(id)
+            "product" -> dao.hardDeleteProduct(id)
+            "customer" -> dao.hardDeleteCustomer(id)
+            "payment" -> dao.hardDeletePayment(id)
+            "expense" -> dao.hardDeleteExpense(id)
+            else -> error("Unknown entity: $entity")
+        }
+        if (session.token != null) session.addPendingPurge(entity, id) // nothing to reach in the cloud if never signed in
+    }
 
     // ---------- Pure helpers ----------
     companion object {

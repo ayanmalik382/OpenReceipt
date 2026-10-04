@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field, field_validator
 EMAIL_RE = re.compile(r"^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$")
 ALLOWED_ENTITIES = {"business", "supplier", "product", "customer", "order", "orderItem", "payment", "expense"}
 
+PURGEABLE_ENTITIES = {"business", "supplier", "product", "customer", "payment", "expense"}
+
 
 class RegisterIn(BaseModel):
     email: str
@@ -87,3 +89,32 @@ class SyncOut(BaseModel):
     cursor: int
     hasMore: bool
     changes: list[ChangeOut]
+
+
+# ---------------------------------------------------------------- Business directory
+
+class DirectoryPublishIn(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    city: str = Field(min_length=1, max_length=100)
+    field: str = Field(min_length=1, max_length=100)
+    nature: str = Field(min_length=1, max_length=100)
+    phone: str = Field(default="", max_length=32)
+    address: str = Field(default="", max_length=300)
+
+
+class DirectoryEntryOut(BaseModel):
+    id: str
+    name: str
+    city: str
+    field: str
+    nature: str
+    phone: str
+    address: str
+    # Always true: only an entry a signed-in owner explicitly published can exist at all, so
+    # everything returned by search is "verified" by definition - see models.DirectoryListing.
+    verified: bool = True
+
+
+class DirectorySearchOut(BaseModel):
+    results: list[DirectoryEntryOut]
+    hasMore: bool

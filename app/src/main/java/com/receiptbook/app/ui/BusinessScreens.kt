@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.receiptbook.app.AppContainer
 import com.receiptbook.app.R
 import com.receiptbook.app.data.Business
+import com.receiptbook.app.data.BusinessFields
+import com.receiptbook.app.data.BusinessNatures
 import com.receiptbook.app.i18n.L
 import com.receiptbook.app.i18n.Languages
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onSignIn: () -> Unit, onAppIcon: () -> Unit) {
+fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit, onLanguage: () -> Unit, onSignIn: () -> Unit, onAppIcon: () -> Unit, onDeletedBusinesses: () -> Unit, onDirectory: () -> Unit) {
     val loc = L.current
     val email by c.session.email.collectAsStateWithLifecycle()
     val list by remember { c.db.dao().observeBusinesses() }.collectAsStateWithLifecycle(emptyList())
@@ -41,10 +44,12 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
     AppScaffold(
         title = loc.t(R.string.my_businesses),
         actions = {
+            IconButton(onClick = onDirectory) { Icon(Icons.Filled.Search, loc.t(R.string.find_other_businesses)) }
             IconButton(onClick = onLanguage) { Icon(Icons.Filled.Language, loc.t(R.string.language)) }
             IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, null) }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(text = { Text(loc.t(R.string.app_icon)) }, onClick = { menu = false; onAppIcon() })
+                DropdownMenuItem(text = { Text(loc.t(R.string.recently_deleted_businesses)) }, onClick = { menu = false; onDeletedBusinesses() })
                 if (email == null) {
                     DropdownMenuItem(text = { Text(loc.t(R.string.sign_in_to_back_up)) }, onClick = { menu = false; onSignIn() })
                 } else {
@@ -79,7 +84,18 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
-            if (list.isEmpty()) EmptyState(loc.t(R.string.no_business_yet))
+            // First sync ever on this device (never completed one, but one is actively running):
+            // the list is very likely empty right now not because there's no data, but because it's
+            // still coming down from the cloud. Say so clearly instead of showing a bare empty state.
+            if (list.isEmpty() && email != null && sync.running && sync.lastOk == 0L) {
+                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        CircularProgressIndicator()
+                        Text(loc.t(R.string.restoring_your_data), style = MaterialTheme.typography.titleMedium)
+                        Text(loc.t(R.string.restoring_your_data_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    }
+                }
+            } else if (list.isEmpty()) EmptyState(loc.t(R.string.no_business_yet))
             else LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(list, key = { it.id }) { b ->
                     ElevatedCard(Modifier.fillMaxWidth().clickable { onOpen(b.id) }) {
@@ -145,19 +161,19 @@ fun BusinessListScreen(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> U
 }
 
 @Composable
-fun BusinessFormScreen(c: AppContainer, bid: String?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit) {
+fun BusinessFormScreen(c: AppContainer, bid: String?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit, onTrash: (String) -> Unit) {
     val existing by produceState<Business?>(initialValue = null, bid) {
         value = if (bid == null) null else c.db.dao().business(bid)
     }
     if (bid != null && existing == null) {
         AppScaffold(L.t(R.string.business_settings), onBack) { pad -> Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
     } else {
-        BusinessForm(c, existing, onDone, onBack, onTemplate)
+        BusinessForm(c, existing, onDone, onBack, onTemplate, onTrash)
     }
 }
 
 @Composable
-private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit) {
+private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Unit, onBack: () -> Unit, onTemplate: (String) -> Unit, onTrash: (String) -> Unit) {
     val loc = L.current
     val scope = rememberCoroutineScope()
     val email by c.session.email.collectAsStateWithLifecycle()
@@ -172,6 +188,11 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
     var receiptLang by remember { mutableStateOf(ex?.receiptLang ?: "") }
     var templateId by remember { mutableStateOf(ex?.templateId ?: "classic") }
     var logo by remember { mutableStateOf(ex?.logoBase64 ?: "") }
+    var ntn by remember { mutableStateOf(ex?.ntn ?: "") }
+    var city by remember { mutableStateOf(ex?.city ?: "") }
+    var fieldOfBusiness by remember { mutableStateOf(ex?.fieldOfBusiness ?: "") }
+    var fieldOfBusinessOther by remember { mutableStateOf(ex?.fieldOfBusinessOther ?: "") }
+    var natureOfBusiness by remember { mutableStateOf(ex?.natureOfBusiness ?: "") }
     var suppliers by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
@@ -185,6 +206,28 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
             Field(name, { name = it }, loc.t(R.string.business_name_req))
             Field(address, { address = it }, loc.t(R.string.address))
             Field(phone, { phone = it }, loc.t(R.string.business_phone), keyboard = KeyboardType.Phone)
+
+            HorizontalDivider()
+            Text(loc.t(R.string.business_details), style = MaterialTheme.typography.titleSmall)
+            Field(city, { city = it }, loc.t(R.string.city))
+            Field(ntn, { ntn = it }, loc.t(R.string.ntn_optional))
+            Picker(
+                loc.t(R.string.field_of_business),
+                if (fieldOfBusiness.isBlank()) loc.t(R.string.choose) else loc.t(BusinessFields.labelRes(fieldOfBusiness)),
+                BusinessFields.all.map { loc.t(it.labelRes) to it.id },
+                { fieldOfBusiness = it }
+            )
+            if (fieldOfBusiness == BusinessFields.OTHER) {
+                Field(fieldOfBusinessOther, { fieldOfBusinessOther = it }, loc.t(R.string.other_field_hint))
+            }
+            Picker(
+                loc.t(R.string.nature_of_business),
+                if (natureOfBusiness.isBlank()) loc.t(R.string.choose) else loc.t(BusinessNatures.labelRes(natureOfBusiness)),
+                BusinessNatures.all.map { loc.t(it.labelRes) to it.id },
+                { natureOfBusiness = it }
+            )
+            HorizontalDivider()
+
             Text(loc.t(R.string.sales_terms_offered), style = MaterialTheme.typography.titleSmall)
             Row(verticalAlignment = Alignment.CenterVertically) { Switch(cash, { cash = it }); Spacer(Modifier.width(8.dp)); Text(loc.t(R.string.term_cash)) }
             Row(verticalAlignment = Alignment.CenterVertically) { Switch(credit, { credit = it }); Spacer(Modifier.width(8.dp)); Text(loc.t(R.string.term_credit)) }
@@ -216,6 +259,9 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 )
             } else {
                 OutlinedButton(onClick = { onTemplate(ex.id) }, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.receipt_template)) }
+                OutlinedButton(onClick = { onTrash(ex.id) }, modifier = Modifier.fillMaxWidth()) { Text(loc.t(R.string.recently_deleted)) }
+                HorizontalDivider()
+                DirectoryListingSection(c, ex, email, name, city, fieldOfBusiness, fieldOfBusinessOther, natureOfBusiness, phone, address)
             }
             ErrorText(error)
             Button(modifier = Modifier.fillMaxWidth(), onClick = {
@@ -224,19 +270,30 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                     name.isBlank() -> loc.t(R.string.err_enter_business_name)
                     phone.isNotBlank() && digits < 7 -> loc.t(R.string.err_valid_phone)
                     !cash && !credit -> loc.t(R.string.err_choose_sales_term)
+                    city.isBlank() -> loc.t(R.string.err_enter_city)
+                    fieldOfBusiness.isBlank() -> loc.t(R.string.err_choose_field)
+                    fieldOfBusiness == BusinessFields.OTHER && fieldOfBusinessOther.isBlank() -> loc.t(R.string.err_choose_field_other)
+                    natureOfBusiness.isBlank() -> loc.t(R.string.err_choose_nature)
                     else -> null
                 }
                 if (error == null) scope.launch {
                     if (ex == null) {
                         val ownerKey = email ?: com.receiptbook.app.net.SessionStore.LOCAL_OWNER
-                        val id = c.repo.createBusiness(ownerKey, name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines(), templateId, logoBase64 = logo)
+                        val id = c.repo.createBusiness(
+                            ownerKey, name, address, phone, cash, credit, currency, prefix, footer, receiptLang, suppliers.lines(), templateId,
+                            logoBase64 = logo, ntn = ntn, city = city, fieldOfBusiness = fieldOfBusiness,
+                            fieldOfBusinessOther = fieldOfBusinessOther, natureOfBusiness = natureOfBusiness
+                        )
                         onDone(id)
                     } else {
                         c.repo.save(
                             ex.copy(
                                 name = name.trim(), address = address.trim(), phone = phone.trim(), allowCash = cash, allowCredit = credit,
                                 currency = currency.trim().ifBlank { "Rs" }, receiptPrefix = prefix.trim().ifBlank { "R" },
-                                footerNote = footer.trim(), receiptLang = receiptLang, logoBase64 = logo
+                                footerNote = footer.trim(), receiptLang = receiptLang, logoBase64 = logo,
+                                ntn = ntn.trim(), city = city.trim(), fieldOfBusiness = fieldOfBusiness,
+                                fieldOfBusinessOther = if (fieldOfBusiness == BusinessFields.OTHER) fieldOfBusinessOther.trim() else "",
+                                natureOfBusiness = natureOfBusiness
                             )
                         )
                         onDone(null)
@@ -277,4 +334,66 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
         loc.t(R.string.delete_business_title), loc.t(R.string.delete_business_body, ex.name), loc.t(R.string.delete),
         onConfirm = { scope.launch { c.repo.remove(ex); confirmDelete = false; onDone("DELETED") } }, onDismiss = { confirmDelete = false }
     )
+}
+
+/**
+ * The opt-in toggle to publish this business into the cross-account directory (see
+ * ApiClient.publishToDirectory / server/app/routers/directory.py). Publishes whatever is
+ * currently typed into the form's fields, not just what was last saved - so what you see is what
+ * gets listed. Requires being signed in, since the directory only exists in the cloud.
+ */
+@Composable
+private fun DirectoryListingSection(
+    c: AppContainer, ex: Business, email: String?, name: String, city: String,
+    fieldOfBusiness: String, fieldOfBusinessOther: String, natureOfBusiness: String, phone: String, address: String
+) {
+    val loc = L.current
+    val scope = rememberCoroutineScope()
+    var listed by remember(ex.id) { mutableStateOf(ex.listedInDirectory) }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(loc.t(R.string.directory_listing), style = MaterialTheme.typography.titleSmall)
+        Text(loc.t(R.string.list_my_business_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+        if (email == null) {
+            Text(loc.t(R.string.list_my_business_needs_login), style = MaterialTheme.typography.bodySmall, color = Red)
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Switch(
+                    checked = listed, enabled = !busy,
+                    onCheckedChange = { want ->
+                        val fieldLabel = if (fieldOfBusiness == BusinessFields.OTHER) fieldOfBusinessOther else fieldOfBusiness
+                        busy = true; error = null
+                        scope.launch {
+                            try {
+                                if (want) c.api.publishToDirectory(ex.id, name, city, fieldLabel, natureOfBusiness, phone, address)
+                                else c.api.unpublishFromDirectory(ex.id)
+                                c.repo.save(ex.copy(listedInDirectory = want))
+                                listed = want
+                            } catch (e: Exception) {
+                                error = loc.t(R.string.publish_failed)
+                            } finally {
+                                busy = false
+                            }
+                        }
+                    }
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(loc.t(R.string.list_my_business))
+                if (busy) { Spacer(Modifier.width(8.dp)); CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp) }
+            }
+            ErrorText(error)
+            if (listed) {
+                ElevatedCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(loc.t(R.string.directory_preview), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
+                        Spacer(Modifier.height(4.dp))
+                        Text(name.ifBlank { ex.name }, style = MaterialTheme.typography.titleSmall)
+                        Text(listOfNotNull(city.takeIf { it.isNotBlank() }, phone.takeIf { it.isNotBlank() }).joinToString("  •  "), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+    }
 }

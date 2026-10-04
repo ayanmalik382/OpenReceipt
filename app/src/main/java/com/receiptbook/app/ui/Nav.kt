@@ -48,19 +48,24 @@ fun AppNav(c: AppContainer) {
         composable("businesses") {
             BusinessListScreen(c, onOpen = { nav.navigate("home/$it") }, onNew = { nav.navigate("business/new") },
                 onLanguage = { nav.navigate("language") }, onSignIn = { nav.navigate("login") },
-                onAppIcon = { nav.navigate("appicon") })
+                onAppIcon = { nav.navigate("appicon") }, onDeletedBusinesses = { nav.navigate("deletedbusinesses") },
+                onDirectory = { nav.navigate("directory") })
         }
+        composable("deletedbusinesses") { DeletedBusinessesScreen(c, onBack = { nav.popBackStack() }) }
+        composable("directory") { DirectoryScreen(c, onBack = { nav.popBackStack() }, onSignIn = { nav.navigate("login") }) }
         composable("language") { LanguageScreen(onBack = { nav.popBackStack() }) }
         composable("appicon") { AppIconScreen(onBack = { nav.popBackStack() }) }
         composable("business/new") {
             BusinessFormScreen(c, null, onDone = { id -> if (id != null) nav.navigate("home/$id") { popUpTo("businesses") } else nav.popBackStack() },
-                onBack = { nav.popBackStack() }, onTemplate = {})
+                onBack = { nav.popBackStack() }, onTemplate = {}, onTrash = {})
         }
         composable("business/edit/{bid}") { e ->
             BusinessFormScreen(c, s(e, "bid"), onDone = { r -> if (r == "DELETED") nav.popBackStack("businesses", false) else nav.popBackStack() },
-                onBack = { nav.popBackStack() }, onTemplate = { bid -> nav.navigate("business/template/$bid") })
+                onBack = { nav.popBackStack() }, onTemplate = { bid -> nav.navigate("business/template/$bid") },
+                onTrash = { bid -> nav.navigate("trash/$bid") })
         }
         composable("business/template/{bid}") { e -> TemplateScreen(c, s(e, "bid"), onBack = { nav.popBackStack() }) }
+        composable("trash/{bid}") { e -> TrashScreen(c, s(e, "bid"), onBack = { nav.popBackStack() }) }
 
         // ---- inside a business
         composable("home/{bid}") { e -> HomeScreen(c, s(e, "bid"), onBack = { nav.popBackStack() }, go = { nav.navigate(it) }) }

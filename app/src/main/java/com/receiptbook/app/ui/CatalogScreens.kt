@@ -204,6 +204,7 @@ fun SuppliersScreen(c: AppContainer, bid: String, onBack: () -> Unit) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                         ImagePicker(photo, { photo = it }, size = 72.dp, placeholder = androidx.compose.material.icons.Icons.Filled.LocalShipping)
                     }
+                    ImportFromContactsButton(onPicked = { picked -> if (name.isBlank()) name = picked.name; phone = picked.phone })
                     Field(name, { name = it }, loc.t(R.string.supplier_name_req))
                     Field(phone, { phone = it }, loc.t(R.string.phone), keyboard = KeyboardType.Phone)
                     Field(address, { address = it }, loc.t(R.string.address))
@@ -249,6 +250,7 @@ fun CustomerDialog(bid: String, initial: Customer?, onSave: (Customer) -> Unit, 
                 Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                     ImagePicker(photo, { photo = it }, size = 72.dp, placeholder = androidx.compose.material.icons.Icons.Filled.Person)
                 }
+                ImportFromContactsButton(onPicked = { picked -> if (name.isBlank()) name = picked.name; phone = picked.phone })
                 Field(name, { name = it }, loc.t(R.string.customer_name_req))
                 Field(phone, { phone = it }, loc.t(R.string.phone), keyboard = KeyboardType.Phone)
                 Field(address, { address = it }, loc.t(R.string.address))

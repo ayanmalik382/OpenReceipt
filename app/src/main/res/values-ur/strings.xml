@@ -469,4 +469,81 @@
     <string name="cr_sheet_ledger">حساب</string>
     <string name="cr_receipts_in_period">اس مدت میں %1$d رسیدیں</string>
     <string name="cr_balance_now">مدت کے اختتام پر بیلنس</string>
+    <string name="recently_deleted">حال ہی میں حذف شدہ</string>
+    <string name="recently_deleted_businesses">حال ہی میں حذف شدہ کاروبار</string>
+    <string name="restore">واپس لائیں</string>
+    <string name="delete_permanently">مستقل طور پر حذف کریں</string>
+    <string name="delete_permanently_title">مستقل طور پر حذف کریں؟</string>
+    <string name="delete_permanently_body">یہ اس فون سے، اور اگر آپ سائن ان ہیں تو کلاؤڈ سے بھی ہٹا دیا جائے گا۔ یہ واپس نہیں ہو سکتا۔</string>
+    <string name="nothing_in_trash">یہاں کچھ نہیں ہے۔</string>
+    <string name="restored">واپس آ گیا</string>
+    <string name="deleted_forever">مستقل طور پر حذف ہو گیا</string>
+    <string name="restoring_your_data">آپ کا ڈیٹا واپس لایا جا رہا ہے…</string>
+    <string name="restoring_your_data_hint">نئے فون پر پہلی بار سائن ان کرنے پر اس میں تھوڑا وقت لگ سکتا ہے۔</string>
+    <string name="deleted_on">%1$s کو حذف کیا گیا</string>
+    <string name="trash_hint">حذف شدہ چیزیں یہاں رہتی ہیں جب تک آپ انہیں واپس نہ لائیں یا مستقل طور پر حذف نہ کریں - غلطی سے کچھ بھی ہمیشہ کے لیے نہیں مٹتا۔</string>
+    <string name="delete_business_forever_note">اس کی اشیاء، گاہک، سپلائرز اور دیگر ریکارڈ حذف نہیں ہوں گے - وہ آپ کے اکاؤنٹ میں چھپے رہیں گے، جب تک آپ اس کاروبار کو واپس نہ لائیں۔</string>
+    <!-- Field of business -->
+    <string name="field_food">خوراک</string>
+    <string name="field_engineering">انجینئرنگ</string>
+    <string name="field_manufacturing">مینوفیکچرنگ</string>
+    <string name="field_it">آئی ٹی</string>
+    <string name="field_retail">ریٹیل</string>
+    <string name="field_construction">تعمیرات</string>
+    <string name="field_textile">ٹیکسٹائل</string>
+    <string name="field_agriculture">زراعت</string>
+    <string name="field_healthcare">صحت</string>
+    <string name="field_education">تعلیم</string>
+    <string name="field_automotive">آٹوموٹو</string>
+    <string name="field_electronics">الیکٹرانکس</string>
+    <string name="field_furniture">فرنیچر</string>
+    <string name="field_hardware">ہارڈویئر</string>
+    <string name="field_pharmaceuticals">ادویات</string>
+    <string name="field_transport">نقل و حمل / لاجسٹکس</string>
+    <string name="field_real_estate">رئیل اسٹیٹ</string>
+    <string name="field_other">دیگر</string>
+
+    <!-- Nature of business -->
+    <string name="nature_manufacturing">مینوفیکچرنگ</string>
+    <string name="nature_retail">ریٹیل</string>
+    <string name="nature_marketing_booking">مارکیٹنگ / بکنگ</string>
+    <string name="nature_distribution">تقسیم</string>
+
+    <!-- Business registration details -->
+    <string name="business_details">کاروبار کی تفصیلات</string>
+    <string name="ntn_optional">این ٹی این (اختیاری)</string>
+    <string name="city">شہر</string>
+    <string name="field_of_business">کاروبار کا شعبہ</string>
+    <string name="nature_of_business">کاروبار کی نوعیت</string>
+    <string name="other_field_hint">اپنے کاروبار کا شعبہ بتائیں</string>
+    <string name="err_enter_city">شہر درج کریں</string>
+    <string name="err_choose_field">کاروبار کا شعبہ منتخب کریں</string>
+    <string name="err_choose_field_other">اپنے کاروبار کا شعبہ بتائیں</string>
+    <string name="err_choose_nature">کاروبار کی نوعیت منتخب کریں</string>
+
+    <!-- Contacts -->
+    <string name="import_from_contacts">رابطوں سے درآمد کریں</string>
+    <string name="contacts_permission_needed">نام اور فون نمبر درآمد کرنے کے لیے رسید بک کو آپ کے رابطے پڑھنے کی اجازت چاہیے۔</string>
+    <string name="contacts_permission_denied">اجازت نہیں دی گئی - آپ تفصیلات خود بھی درج کر سکتے ہیں۔</string>
+
+    <!-- Business directory -->
+    <string name="find_other_businesses">دوسرے کاروبار تلاش کریں</string>
+    <string name="directory_title">کاروباری ڈائریکٹری</string>
+    <string name="search_businesses">نام یا شہر سے تلاش کریں</string>
+    <string name="filter_field">شعبہ</string>
+    <string name="filter_nature">نوعیت</string>
+    <string name="filter_all">تمام</string>
+    <string name="verified_business">تصدیق شدہ</string>
+    <string name="verified_business_hint">ایک سائن ان شدہ رسید بک اکاؤنٹ کی طرف سے شائع کیا گیا</string>
+    <string name="no_directory_results">کوئی کاروبار نہیں ملا۔ مختلف تلاش یا فلٹر آزمائیں۔</string>
+    <string name="load_more">مزید دکھائیں</string>
+    <string name="directory_listing">ڈائریکٹری اندراج</string>
+    <string name="list_my_business">میرا کاروبار ڈائریکٹری میں شامل کریں</string>
+    <string name="list_my_business_hint">دوسرے دکانداروں کو یہ کاروبار شعبہ، نوعیت یا شہر سے تلاش کرنے دیں۔ آپ یہ کسی بھی وقت بند کر سکتے ہیں۔ سائن ان ضروری ہے۔</string>
+    <string name="list_my_business_needs_login">اپنا کاروبار ڈائریکٹری میں شامل کرنے کے لیے سائن ان کریں۔</string>
+    <string name="published_to_directory">ڈائریکٹری میں شامل کر دیا گیا</string>
+    <string name="unpublished_from_directory">ڈائریکٹری سے ہٹا دیا گیا</string>
+    <string name="publish_failed">آپ کی ڈائریکٹری اندراج اپ ڈیٹ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="directory_preview">دوسروں کو آپ کا کاروبار اس طرح نظر آئے گا:</string>
+    <string name="choose">منتخب کریں</string>
 </resources>

@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [Business::class, Supplier::class, Product::class, Customer::class,
         SaleOrder::class, OrderItem::class, Payment::class, Expense::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -19,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(ctx: Context): AppDatabase =
             Room.databaseBuilder(ctx.applicationContext, AppDatabase::class.java, "receiptbook.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .build()
 
         /** v2: receipt language per business + receipt reference on payments (for translation). */
@@ -45,6 +45,19 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE businesses ADD COLUMN logoBase64 TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE customers ADD COLUMN photoBase64 TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE suppliers ADD COLUMN photoBase64 TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
+        /** v5: business registration details (NTN, city, field/nature of business) used for
+         * acknowledging what a business does, plus the opt-in cross-account directory listing. */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE businesses ADD COLUMN ntn TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE businesses ADD COLUMN city TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE businesses ADD COLUMN fieldOfBusiness TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE businesses ADD COLUMN fieldOfBusinessOther TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE businesses ADD COLUMN natureOfBusiness TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE businesses ADD COLUMN listedInDirectory INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

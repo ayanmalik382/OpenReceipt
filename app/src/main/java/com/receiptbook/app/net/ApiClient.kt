@@ -31,7 +31,8 @@ class ApiClient(private val baseUrl: String, private val session: SessionStore) 
             "RATE_LIMITED" to R.string.srv_rate_limited,
             "SERVER_ERROR" to R.string.srv_server_error,
             "INVALID_REQUEST" to R.string.srv_invalid_request,
-            "NOT_FOUND" to R.string.srv_invalid_request
+            "NOT_FOUND" to R.string.srv_invalid_request,
+            "NOT_PURGEABLE" to R.string.srv_invalid_request
         )
     }
 
@@ -85,6 +86,54 @@ class ApiClient(private val baseUrl: String, private val session: SessionStore) 
 
     suspend fun deleteAccount(password: String) {
         call("DELETE", "/auth/account", JSONObject().put("password", password), true)
+    }
+
+    /** Permanently removes one record from this account's cloud copy - not the ordinary sync
+     * soft-delete, an actual row deletion. See Repository.purge / the "Recently deleted" screens. */
+    suspend fun purge(entity: String, id: String) {
+        call("DELETE", "/sync/$entity/$id", null, true)
+    }
+
+    // ---------------------------------------------------------------- Business directory
+    // A cross-account "find other businesses" listing - separate from ordinary sync, which is
+    // strictly private to one account. Publishing is always something the business owner opts
+    // into (see Business.listedInDirectory); nothing here happens automatically on login.
+
+    class DirectoryEntry(
+        val id: String, val name: String, val city: String, val field: String, val nature: String,
+        val phone: String, val address: String, val verified: Boolean
+    )
+    class DirectoryPage(val results: List<DirectoryEntry>, val hasMore: Boolean)
+
+    suspend fun publishToDirectory(businessId: String, name: String, city: String, field: String, nature: String, phone: String, address: String) {
+        val body = JSONObject().put("name", name).put("city", city).put("field", field)
+            .put("nature", nature).put("phone", phone).put("address", address)
+        call("PUT", "/directory/$businessId", body, true)
+    }
+
+    suspend fun unpublishFromDirectory(businessId: String) {
+        call("DELETE", "/directory/$businessId", null, true)
+    }
+
+    suspend fun searchDirectory(field: String?, nature: String?, city: String?, q: String?, limit: Int = 20, offset: Int = 0): DirectoryPage {
+        fun enc(s: String) = java.net.URLEncoder.encode(s, "UTF-8")
+        val params = buildList {
+            field?.takeIf { it.isNotBlank() }?.let { add("field=${enc(it)}") }
+            nature?.takeIf { it.isNotBlank() }?.let { add("nature=${enc(it)}") }
+            city?.takeIf { it.isNotBlank() }?.let { add("city=${enc(it)}") }
+            q?.takeIf { it.isNotBlank() }?.let { add("q=${enc(it)}") }
+            add("limit=$limit"); add("offset=$offset")
+        }
+        val r = call("GET", "/directory?" + params.joinToString("&"), null, true)
+        val arr = r.getJSONArray("results")
+        val results = (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            DirectoryEntry(
+                o.getString("id"), o.getString("name"), o.getString("city"), o.getString("field"), o.getString("nature"),
+                o.optString("phone", ""), o.optString("address", ""), o.optBoolean("verified", true)
+            )
+        }
+        return DirectoryPage(results, r.getBoolean("hasMore"))
     }
 
     suspend fun sync(cursor: Long, changes: List<Change>): SyncResponse {

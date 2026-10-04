@@ -1,3 +1,4 @@
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import StaticPool
@@ -16,9 +17,20 @@ def _make_engine():
     if url.startswith("sqlite"):
         # In-memory SQLite (used by the test suite) needs one shared connection, or every
         # session sees an empty database.
-        return create_async_engine(
+        engine = create_async_engine(
             url, connect_args={"check_same_thread": False}, poolclass=StaticPool
         )
+        # SQLite ignores ON DELETE CASCADE (and all other foreign-key enforcement) unless this
+        # pragma is set on every single connection - it is NOT the default, unlike Postgres/Neon.
+        # Without this, deleting an account would silently leave its directory_listings/records
+        # rows behind on SQLite (it already worked correctly on the real Neon/Postgres backend).
+        @event.listens_for(engine.sync_engine, "connect")
+        def _enable_sqlite_foreign_keys(dbapi_connection, _):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
+        return engine
     # Neon (and most managed Postgres) require TLS; asyncpg wants it as a connect arg,
     # not a "?sslmode=require" query string.
     # Neon's "-pooler" hostnames go through PgBouncer, which doesn't reliably support asyncpg's
@@ -41,7 +53,5 @@ async def get_db():
 
 
 async def init_models():
-    """Creates tables if they don't exist yet. Simple and idempotent - fine at this scale.
-    For a larger project, switch to Alembic migrations instead of create_all."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

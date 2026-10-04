@@ -36,3 +36,19 @@ class Record(Base):
     seq: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     __table_args__ = (Index("ix_records_user_seq", "user_id", "seq"),)
+
+
+class DirectoryListing(Base):
+    __tablename__ = "directory_listings"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)  # the business's own local id
+    owner_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    field: Mapped[str] = mapped_column(String(100), nullable=False)
+    nature: Mapped[str] = mapped_column(String(100), nullable=False)
+    phone: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+    address: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
+
+    __table_args__ = (Index("ix_directory_field_nature_city", "field", "nature", "city"),)

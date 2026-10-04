@@ -16,6 +16,6 @@ server/node_modules/
 
 server/data/
 
-server/.env
-
-/.env
+server/.venv/
+server/.venv
+/.venv

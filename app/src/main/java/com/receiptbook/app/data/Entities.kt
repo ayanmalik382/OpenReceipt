@@ -40,6 +40,18 @@ data class Business(
     @ColumnInfo(defaultValue = "''") val templateConfig: String = "",
     /** Compressed Base64 JPEG logo, shown on the home screen and every receipt/report. Empty = none. */
     @ColumnInfo(defaultValue = "''") val logoBase64: String = "",
+    /** National Tax Number - optional, so may be blank. */
+    @ColumnInfo(defaultValue = "''") val ntn: String = "",
+    @ColumnInfo(defaultValue = "''") val city: String = "",
+    /** One of BusinessFields.ids, or "other" - see data/BusinessCategories.kt. */
+    @ColumnInfo(defaultValue = "''") val fieldOfBusiness: String = "",
+    /** Only used when fieldOfBusiness == "other": the person's own typed-in description. */
+    @ColumnInfo(defaultValue = "''") val fieldOfBusinessOther: String = "",
+    /** One of BusinessNatures.ids - see data/BusinessCategories.kt. */
+    @ColumnInfo(defaultValue = "''") val natureOfBusiness: String = "",
+    /** Published to the cross-account directory so other shop owners can find this business?
+     * Off by default - publishing is always something the owner opts into, never automatic. */
+    @ColumnInfo(defaultValue = "0") val listedInDirectory: Boolean = false,
     override val updatedAt: Long = 0,
     override val deleted: Boolean = false,
     override val dirty: Boolean = true

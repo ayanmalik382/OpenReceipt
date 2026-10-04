@@ -147,3 +147,127 @@ async def test_sync_accepts_record_with_embedded_image(client):
     assert r.status_code == 200
     r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers=headers)
     assert len(r.json()["changes"]) == 1
+
+
+def test_neon_connection_string_is_accepted_as_pasted():
+    from app.config import _to_asyncpg
+    neon = "postgresql://user:pw@ep-x-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    assert _to_asyncpg(neon) == "postgresql+asyncpg://user:pw@ep-x-pooler.c-6.us-east-2.aws.neon.tech/neondb"
+    assert _to_asyncpg("postgres://u:p@h/db?sslmode=require&application_name=rb").endswith("/db?application_name=rb")
+    assert _to_asyncpg("sqlite+aiosqlite:///:memory:") == "sqlite+aiosqlite:///:memory:"
+
+
+async def test_purge_permanently_removes_a_soft_deleted_record(client):
+    token = await register_and_verify(client, "purge@test.com")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Push a business, then soft-delete it (ordinary sync behaviour: still present, deleted=true).
+    await client.post("/sync", json={"cursor": 0, "changes": [rec("business", "bp1", 100, {"name": "Shop"})]}, headers=headers)
+    soft = rec("business", "bp1", 200, {"name": "Shop"}); soft["deleted"] = True
+    await client.post("/sync", json={"cursor": 0, "changes": [soft]}, headers=headers)
+    r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers=headers)
+    row = next(c for c in r.json()["changes"] if c["id"] == "bp1")
+    assert row["deleted"] is True
+
+    # Now permanently purge it - the row should be gone entirely, not just marked deleted.
+    r = await client.request("DELETE", "/sync/business/bp1", headers=headers)
+    assert r.status_code == 200
+
+    r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers=headers)
+    assert not any(c["id"] == "bp1" for c in r.json()["changes"])
+
+
+async def test_purge_rejects_receipts(client):
+    token = await register_and_verify(client, "purge2@test.com")
+    headers = {"Authorization": f"Bearer {token}"}
+    r = await client.request("DELETE", "/sync/order/anything", headers=headers)
+    assert r.status_code == 400
+    assert r.json()["code"] == "NOT_PURGEABLE"
+
+
+async def test_purge_requires_auth(client):
+    r = await client.request("DELETE", "/sync/business/x")
+    assert r.status_code == 401
+
+
+async def test_purge_is_scoped_to_the_owning_user(client):
+    token_a = await register_and_verify(client, "purgea@test.com")
+    token_b = await register_and_verify(client, "purgeb@test.com")
+    await client.post("/sync", json={"cursor": 0, "changes": [rec("business", "bpx", 1)]}, headers={"Authorization": f"Bearer {token_a}"})
+    # User B tries to purge User A's record id - should silently no-op, not delete A's data.
+    r = await client.request("DELETE", "/sync/business/bpx", headers={"Authorization": f"Bearer {token_b}"})
+    assert r.status_code == 200
+    r = await client.post("/sync", json={"cursor": 0, "changes": []}, headers={"Authorization": f"Bearer {token_a}"})
+    assert any(c["id"] == "bpx" for c in r.json()["changes"])
+
+
+# ---------------------------------------------------------------- Business directory
+
+async def test_directory_publish_search_and_excludes_own_businesses(client):
+    token_a = await register_and_verify(client, "dira@test.com")
+    token_b = await register_and_verify(client, "dirb@test.com")
+    ha, hb = {"Authorization": f"Bearer {token_a}"}, {"Authorization": f"Bearer {token_b}"}
+
+    body = {"name": "Ali Traders", "city": "Lahore", "field": "food", "nature": "retail", "phone": "0300", "address": "Main Rd"}
+    r = await client.put("/directory/biz-a", json=body, headers=ha)
+    assert r.status_code == 200
+
+    # User A does not see their own listing in search results.
+    r = await client.get("/directory", headers=ha)
+    assert r.json()["results"] == []
+
+    # User B finds it, and it's marked verified.
+    r = await client.get("/directory", headers=hb)
+    results = r.json()["results"]
+    assert len(results) == 1 and results[0]["name"] == "Ali Traders" and results[0]["verified"] is True
+
+
+async def test_directory_filters_by_field_nature_and_city(client):
+    token = await register_and_verify(client, "dirc@test.com")
+    other = await register_and_verify(client, "dird@test.com")
+    h_other = {"Authorization": f"Bearer {other}"}
+    await client.put("/directory/b1", json={"name": "Food Co", "city": "Karachi", "field": "food", "nature": "manufacturing", "phone": "", "address": ""}, headers={"Authorization": f"Bearer {token}"})
+    await client.put("/directory/b2", json={"name": "IT Co", "city": "Lahore", "field": "it", "nature": "retail", "phone": "", "address": ""}, headers={"Authorization": f"Bearer {token}"})
+
+    r = await client.get("/directory?field=food", headers=h_other)
+    assert [x["name"] for x in r.json()["results"]] == ["Food Co"]
+
+    r = await client.get("/directory?city=Lahore", headers=h_other)
+    assert [x["name"] for x in r.json()["results"]] == ["IT Co"]
+
+    r = await client.get("/directory?q=Food", headers=h_other)
+    assert [x["name"] for x in r.json()["results"]] == ["Food Co"]
+
+
+async def test_directory_unpublish_removes_listing(client):
+    token = await register_and_verify(client, "dire@test.com")
+    other = await register_and_verify(client, "dirf@test.com")
+    h, h_other = {"Authorization": f"Bearer {token}"}, {"Authorization": f"Bearer {other}"}
+    await client.put("/directory/b3", json={"name": "Shop", "city": "Lahore", "field": "food", "nature": "retail", "phone": "", "address": ""}, headers=h)
+    assert len((await client.get("/directory", headers=h_other)).json()["results"]) == 1
+    r = await client.delete("/directory/b3", headers=h)
+    assert r.status_code == 200
+    assert len((await client.get("/directory", headers=h_other)).json()["results"]) == 0
+
+
+async def test_directory_cannot_unpublish_someone_elses_listing(client):
+    token = await register_and_verify(client, "dirg@test.com")
+    other = await register_and_verify(client, "dirh@test.com")
+    h, h_other = {"Authorization": f"Bearer {token}"}, {"Authorization": f"Bearer {other}"}
+    await client.put("/directory/b4", json={"name": "Shop", "city": "Lahore", "field": "food", "nature": "retail", "phone": "", "address": ""}, headers=h)
+    await client.delete("/directory/b4", headers=h_other)  # other user tries to delete it - should no-op
+    assert len((await client.get("/directory", headers=h_other)).json()["results"]) == 1
+
+
+async def test_directory_listing_removed_when_account_deleted(client):
+    token = await register_and_verify(client, "diri@test.com")
+    other = await register_and_verify(client, "dirj@test.com")
+    h, h_other = {"Authorization": f"Bearer {token}"}, {"Authorization": f"Bearer {other}"}
+    await client.put("/directory/b5", json={"name": "Shop", "city": "Lahore", "field": "food", "nature": "retail", "phone": "", "address": ""}, headers=h)
+    await client.request("DELETE", "/auth/account", json={"password": "password123"}, headers=h)
+    assert len((await client.get("/directory", headers=h_other)).json()["results"]) == 0
+
+
+async def test_directory_requires_auth(client):
+    r = await client.get("/directory")
+    assert r.status_code == 401

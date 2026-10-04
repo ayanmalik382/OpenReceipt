@@ -14,7 +14,7 @@ ReceiptBook/
 ## 1. Run the backend
 ```bash
 cd server
-python3 -m venv .venv && source .venv/bin/activate // .venv\Scripts\activate.bat
+python -m venv .venv && source .venv/bin/activate // .venv\Scripts\activate.bat
 pip install -r requirements-dev.txt
 cp .env.example .env        # set DATABASE_URL (from Neon) and JWT_SECRET (openssl rand -hex 32)
 export $(grep -v '^#' .env | xargs)
