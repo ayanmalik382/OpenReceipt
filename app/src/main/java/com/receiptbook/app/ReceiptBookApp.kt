@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 class AppContainer(ctx: Context) {
     val session = SessionStore(ctx)
     val db = AppDatabase.build(ctx)
-    val repo = Repository(db)
+    val repo = Repository(db, session)
     val api = ApiClient(BuildConfig.API_BASE_URL, session)
     val sync = SyncManager(db, api, session)
 }

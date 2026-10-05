@@ -81,11 +81,34 @@ class SyncManager(
         if (session.token != null) scope.launch { sync() }
     }
 
+    private suspend fun flushPurges() {
+        if (session.token == null) return
+
+        val pending = session.pendingPurges()
+
+        for ((entity, id) in pending) {
+            try {
+                api.purge(entity, id)
+                session.removePendingPurge(entity, id)
+            } catch (e: ApiClient.ApiException) {
+                // If the record is already gone from the server, the desired
+                // final state has already been reached.
+                if (e.errorCode == "NOT_FOUND") {
+                    session.removePendingPurge(entity, id)
+                }
+            } catch (_: IOException) {
+                // Keep it queued and retry during the next sync.
+                return
+            }
+        }
+    }
+
     /** Returns true on success. Never throws. */
     suspend fun sync(): Boolean = mutex.withLock {
         if (session.token == null || session.email.value == null) return@withLock false
         _state.value = _state.value.copy(running = true, errorRes = null, errorText = null)
         try {
+            flushPurges()
             var cursor = session.cursor
             val pending = tables.flatMap { t -> t.pending().map { t to it } }
             val chunks: List<List<Pair<Table, Pending>>> = if (pending.isEmpty()) listOf(emptyList()) else pending.chunked(20)

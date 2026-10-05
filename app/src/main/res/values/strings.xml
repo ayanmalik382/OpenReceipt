@@ -61,6 +61,8 @@
     <string name="srv_invalid_request">Something went wrong. Please try again.</string>
 
     <!-- Businesses -->
+    <string name="no_recently_deleted_businesses">No recently deleted businesses.</string>
+    <string name="no_recently_deleted">No recently deleted items.</string>
     <string name="my_businesses">My Businesses</string>
     <string name="add_business">Add business</string>
     <string name="new_business">New business</string>
@@ -110,7 +112,8 @@
 
     <!-- Home -->
     <string name="new_receipt_order">New receipt / order</string>
-    <string name="todays_sales">Today\'s sales</string>
+    <!-- <string name="todays_sales">Today&apos;s sales</string> -->
+    <string name="todays_sales">Today sales</string>
     <string name="receipts_count">%1$d receipts</string>
     <string name="cash_in_today">Cash in today</string>
     <string name="out_amount">Out: %1$s</string>
@@ -262,7 +265,8 @@
     <string name="image">Image</string>
     <string name="cancel_this_receipt">Cancel this receipt</string>
     <string name="cancel_receipt_title">Cancel receipt?</string>
-    <string name="cancel_receipt_body">The receipt stays in your records marked CANCELLED, stock is returned and the customer\'s balance is corrected. This cannot be undone.</string>
+    <string name="cancel_receipt_body">Cancel receipt. This action cannot be undone.</string>
+    <!-- <string name="cancel_receipt_body">The receipt stays in your records marked CANCELLED, stock is returned and the customer&apos;s balance is corrected. This cannot be undone.</string> -->
     <string name="receipt_cancelled">Receipt cancelled</string>
     <string name="export_pdf">Export PDF</string>
     <string name="export_excel">Export Excel</string>
@@ -297,7 +301,8 @@
     <string name="category">Category</string>
     <string name="err_choose_customer">Choose a customer</string>
     <string name="delete_payment_title">Delete this payment?</string>
-    <string name="delete_payment_body">%1$s from %2$s. The customer\'s balance will go back up.</string>
+    <!-- <string name="delete_payment_body">%1$s from %2$s. The customer&apos;s balance will go back up.</string> -->
+    <string name="delete_payment_body">Delete payment. The customer balance will be updated.</string>
     <string name="delete_expense_title">Delete this expense?</string>
 
     <string name="cat_supplier_payment">Supplier payment</string>
@@ -474,7 +479,8 @@
     <string name="restore">Restore</string>
     <string name="delete_permanently">Delete permanently</string>
     <string name="delete_permanently_title">Delete permanently?</string>
-    <string name="delete_permanently_body">This removes it from this phone, and from the cloud if you're signed in. It cannot be undone.</string>
+    <string name="delete_permanently_body">Delete permanently. This action cannot be undone.</string>
+    <!-- <string name="delete_permanently_body">This removes it from this phone, and from the cloud if you&apos;re signed in. It cannot be undone.</string> -->
     <string name="nothing_in_trash">Nothing here.</string>
     <string name="restored">Restored</string>
     <string name="deleted_forever">Deleted permanently</string>
@@ -532,7 +538,6 @@
     <string name="search_businesses">Search by name or city</string>
     <string name="filter_field">Field</string>
     <string name="filter_nature">Nature</string>
-    <string name="filter_all">All</string>
     <string name="verified_business">Verified</string>
     <string name="verified_business_hint">Published by a signed-in ReceiptBook account</string>
     <string name="no_directory_results">No businesses found. Try a different search or filter.</string>

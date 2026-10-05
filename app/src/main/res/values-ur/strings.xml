@@ -61,6 +61,8 @@
     <string name="srv_invalid_request">کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔</string>
 
     <!-- Businesses -->
+    <string name="no_recently_deleted_businesses">کوئی حال ہی میں حذف شدہ کاروبار نہیں</string>
+    <string name="no_recently_deleted">یہاں کچھ نہیں ہے</string>
     <string name="my_businesses">میرے کاروبار</string>
     <string name="add_business">کاروبار شامل کریں</string>
     <string name="new_business">نیا کاروبار</string>
@@ -532,7 +534,6 @@
     <string name="search_businesses">نام یا شہر سے تلاش کریں</string>
     <string name="filter_field">شعبہ</string>
     <string name="filter_nature">نوعیت</string>
-    <string name="filter_all">تمام</string>
     <string name="verified_business">تصدیق شدہ</string>
     <string name="verified_business_hint">ایک سائن ان شدہ رسید بک اکاؤنٹ کی طرف سے شائع کیا گیا</string>
     <string name="no_directory_results">کوئی کاروبار نہیں ملا۔ مختلف تلاش یا فلٹر آزمائیں۔</string>

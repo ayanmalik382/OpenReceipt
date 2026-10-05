@@ -98,4 +98,34 @@ interface AppDao {
     @Query("SELECT * FROM payments WHERE id = :id") suspend fun payment(id: String): Payment?
     @Query("SELECT * FROM expenses WHERE id = :id") suspend fun expense(id: String): Expense?
     @Query("SELECT * FROM order_items WHERE id = :id") suspend fun item(id: String): OrderItem?
+
+    @Query("DELETE FROM businesses WHERE id = :id")
+    suspend fun hardDeleteBusiness(id: String)
+
+    @Query("DELETE FROM suppliers WHERE id = :id")
+    suspend fun hardDeleteSupplier(id: String)
+
+    @Query("DELETE FROM products WHERE id = :id")
+    suspend fun hardDeleteProduct(id: String)
+
+    @Query("DELETE FROM customers WHERE id = :id")
+    suspend fun hardDeleteCustomer(id: String)
+
+    @Query("DELETE FROM payments WHERE id = :id")
+    suspend fun hardDeletePayment(id: String)
+
+    @Query("DELETE FROM expenses WHERE id = :id")
+    suspend fun hardDeleteExpense(id: String)
+
+    @Query("SELECT * FROM businesses WHERE deleted = 1 ORDER BY name COLLATE NOCASE")
+    fun observeDeletedBusinesses(): Flow<List<Business>>
+
+    @Query("SELECT * FROM suppliers WHERE businessId = :bid AND deleted = 1 ORDER BY name COLLATE NOCASE")
+    fun observeDeletedSuppliers(bid: String): Flow<List<Supplier>>
+
+    @Query("SELECT * FROM products WHERE businessId = :bid AND deleted = 1 ORDER BY name COLLATE NOCASE")
+    fun observeDeletedProducts(bid: String): Flow<List<Product>>
+
+    @Query("SELECT * FROM customers WHERE businessId = :bid AND deleted = 1 ORDER BY name COLLATE NOCASE")
+    fun observeDeletedCustomers(bid: String): Flow<List<Customer>>
 }
