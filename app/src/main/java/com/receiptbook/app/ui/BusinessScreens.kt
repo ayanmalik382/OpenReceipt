@@ -317,13 +317,13 @@ private fun BusinessForm(c: AppContainer, ex: Business?, onDone: (String?) -> Un
                 )
 
                 Text(
-                    "Developed by Conscitool",
+                    "Developed by Ahsan",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
 
                 Text(
-                    "Contact: +92 339 8000402",
+                    "Contact: +92 320 0600402",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -364,17 +364,27 @@ private fun DirectoryListingSection(
                     checked = listed, enabled = !busy,
                     onCheckedChange = { want ->
                         val fieldLabel = if (fieldOfBusiness == BusinessFields.OTHER) fieldOfBusinessOther else fieldOfBusiness
-                        busy = true; error = null
-                        scope.launch {
-                            try {
-                                if (want) c.api.publishToDirectory(ex.id, name, city, fieldLabel, natureOfBusiness, phone, address)
-                                else c.api.unpublishFromDirectory(ex.id)
-                                c.repo.save(ex.copy(listedInDirectory = want))
-                                listed = want
-                            } catch (e: Exception) {
-                                error = loc.t(R.string.publish_failed)
-                            } finally {
-                                busy = false
+                        // Publishing requires city/field/nature to be filled in (the server rejects
+                        // a listing without them). Check this FIRST so a business created before
+                        // these fields existed gets a clear "fill this in" message instead of a
+                        // silent failure with nothing stored.
+                        if (want && (city.isBlank() || fieldOfBusiness.isBlank() || fieldLabel.isBlank() || natureOfBusiness.isBlank())) {
+                            error = loc.t(R.string.directory_needs_details)
+                        } else {
+                            busy = true; error = null
+                            scope.launch {
+                                try {
+                                    if (want) c.api.publishToDirectory(ex.id, name, city, fieldLabel, natureOfBusiness, phone, address)
+                                    else c.api.unpublishFromDirectory(ex.id)
+                                    c.repo.save(ex.copy(listedInDirectory = want))
+                                    listed = want
+                                } catch (e: java.io.IOException) {
+                                    error = loc.t(R.string.err_no_internet)
+                                } catch (e: Exception) {
+                                    error = loc.t(R.string.publish_failed)
+                                } finally {
+                                    busy = false
+                                }
                             }
                         }
                     }

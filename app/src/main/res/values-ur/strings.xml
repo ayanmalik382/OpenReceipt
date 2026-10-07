@@ -529,6 +529,8 @@
     <string name="contacts_permission_denied">اجازت نہیں دی گئی - آپ تفصیلات خود بھی درج کر سکتے ہیں۔</string>
 
     <!-- Business directory -->
+    <string name="err_no_internet">انٹرنیٹ کنکشن نہیں ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="directory_needs_details">ڈائریکٹری میں شامل کرنے سے پہلے اوپر شہر، کاروبار کا شعبہ اور کاروبار کی نوعیت درج کر کے محفوظ کریں۔</string>
     <string name="find_other_businesses">دوسرے کاروبار تلاش کریں</string>
     <string name="directory_title">کاروباری ڈائریکٹری</string>
     <string name="search_businesses">نام یا شہر سے تلاش کریں</string>
@@ -547,4 +549,5 @@
     <string name="publish_failed">آپ کی ڈائریکٹری اندراج اپ ڈیٹ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="directory_preview">دوسروں کو آپ کا کاروبار اس طرح نظر آئے گا:</string>
     <string name="choose">منتخب کریں</string>
+    <string name="filter_city">شہر</string>
 </resources>

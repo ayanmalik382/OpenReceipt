@@ -533,6 +533,8 @@
     <string name="contacts_permission_denied">Permission denied - you can still enter the details by hand.</string>
 
     <!-- Business directory -->
+    <string name="err_no_internet">No internet connection. Check your connection and try again.</string>
+    <string name="directory_needs_details">Fill in city, field of business and nature of business above and save, before listing in the directory.</string>
     <string name="find_other_businesses">Find other businesses</string>
     <string name="directory_title">Business directory</string>
     <string name="search_businesses">Search by name or city</string>
@@ -550,5 +552,6 @@
     <string name="unpublished_from_directory">Removed from the directory</string>
     <string name="publish_failed">Could not update your directory listing. Check your connection and try again.</string>
     <string name="directory_preview">This is how your business will appear to others:</string>
+    <string name="filter_city">City</string>
     <string name="choose">Choose</string>
 </resources>

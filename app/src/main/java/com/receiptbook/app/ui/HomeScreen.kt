@@ -89,8 +89,8 @@ fun HomeScreen(
             Spacer(Modifier.height(12.dp))
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("ReceiptBook", style = MaterialTheme.typography.titleSmall)
-                Text("Developed by Conscitool", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
-                Text("Contact: +92 339 8000402", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text("Developed by Ahsan", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text("Contact: +92 320 0600402", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
             }
         }
     }

@@ -34,6 +34,7 @@ fun DirectoryScreen(c: AppContainer, onBack: () -> Unit, onSignIn: () -> Unit) {
     val email by c.session.email.collectAsStateWithLifecycle()
 
     var query by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
     var field by remember { mutableStateOf("") }
     var nature by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<ApiClient.DirectoryEntry>>(emptyList()) }
@@ -47,14 +48,19 @@ fun DirectoryScreen(c: AppContainer, onBack: () -> Unit, onSignIn: () -> Unit) {
         scope.launch {
             try {
                 val page = c.api.searchDirectory(
-                    field.takeIf { it.isNotBlank() }, nature.takeIf { it.isNotBlank() }, null,
+                    field.takeIf { it.isNotBlank() }, nature.takeIf { it.isNotBlank() }, city.takeIf { it.isNotBlank() },
                     query.takeIf { it.isNotBlank() }, offset = if (append) results.size else 0
                 )
                 results = if (append) results + page.results else page.results
                 hasMore = page.hasMore
                 searched = true
+            } catch (e: java.io.IOException) {
+                // DNS failure, no network, host unreachable - a device being offline, not a server
+                // problem. Never show the raw exception text ("no address associated with hostname"
+                // etc.) to the person; translate it into something they can act on.
+                error = loc.t(R.string.err_no_internet)
             } catch (e: Exception) {
-                error = e.message
+                error = e.message ?: loc.t(R.string.err_no_internet)
             } finally {
                 loading = false
             }
@@ -75,6 +81,10 @@ fun DirectoryScreen(c: AppContainer, onBack: () -> Unit, onSignIn: () -> Unit) {
                 Field(query, { query = it }, loc.t(R.string.search_businesses), modifier = Modifier.weight(1f))
                 IconButton(onClick = { runSearch(false) }) { Icon(Icons.Filled.Search, loc.t(R.string.search)) }
             }
+            Field(
+                city, { city = it }, loc.t(R.string.filter_city),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)
+            )
             Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Picker(
                     loc.t(R.string.filter_field),

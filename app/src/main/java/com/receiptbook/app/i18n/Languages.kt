@@ -17,7 +17,7 @@ object Languages {
     val all: List<AppLanguage> = listOf(
         AppLanguage("en", "English", rtl = false),
         AppLanguage("ur", "اردو", rtl = true),
-        // AppLanguage("fa", "فارسی", rtl = true),
+        AppLanguage("fa", "فارسی", rtl = true),
         // AppLanguage("ar", "العربية", rtl = true),
         // AppLanguage("hi", "हिन्दी", rtl = false),
     )

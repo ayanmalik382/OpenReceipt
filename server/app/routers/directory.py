@@ -76,7 +76,8 @@ async def search(
     if nature:
         stmt = stmt.where(DirectoryListing.nature == nature)
     if city:
-        stmt = stmt.where(DirectoryListing.city.ilike(city))
+        stmt = stmt.where(DirectoryListing.city.ilike(f"%{city.strip()}%"))
+        # stmt = stmt.where(DirectoryListing.city.ilike(city))
     if q:
         like = f"%{q.strip()}%"
         stmt = stmt.where(or_(DirectoryListing.name.ilike(like), DirectoryListing.city.ilike(like)))
